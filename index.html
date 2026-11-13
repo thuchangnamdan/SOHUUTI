@@ -1,601 +1,108 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Vương Quốc Hữu Tỉ - Toán 7</title>
-  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --primary: #1a2342;
-      --accent: #ffca28;
-      --teal: #1b6b5a;
-      --teal-light: #e0f2ee;
-      --danger: #d94336;
-      --danger-light: #fdecea;
-      --success: #248a4c;
-      --success-light: #e6f7ed;
-      --card: #ffffff;
-    }
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Be Vietnam Pro', sans-serif; }
-    body {
-      margin: 0; padding: 0;
-      background: linear-gradient(180deg, #b8e6ff 0%, #e8f8f0 100%);
-      color: var(--primary); min-height: 100vh; font-size: 17px; line-height: 1.5;
-    }
-    .app { max-width: 560px; margin: 0 auto; min-height: 100vh; padding: 14px; display: flex; flex-direction: column; }
-    .screen { display: none; flex-direction: column; flex: 1; animation: fadeIn 0.22s ease; }
-    .screen.active { display: flex; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-
-    .logo-q {
-      width: 82px; height: 82px; margin: 10px auto 6px; background: #fff;
-      border: 4px solid var(--primary); border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 50px; font-weight: 900; box-shadow: 0 5px 0 var(--primary);
-    }
-    .game-title {
-      text-align: center; font-size: 33px; font-weight: 900; color: var(--accent);
-      text-shadow: -2px -2px 0 var(--primary), 2px -2px 0 var(--primary), -2px 2px 0 var(--primary), 2px 2px 0 var(--primary), 0 4px 0 var(--primary);
-      margin: 4px 0; line-height: 1.2;
-    }
-    .subtitle { text-align: center; font-weight: 700; font-size: 15px; margin-bottom: 12px; }
-    .card {
-      background: var(--card); border: 3px solid var(--primary); border-radius: 18px;
-      padding: 15px; box-shadow: 0 4px 0 var(--primary); margin-bottom: 12px;
-    }
-    .btn {
-      width: 100%; padding: 14px 16px; font-size: 17px; font-weight: 800;
-      border: 3px solid var(--primary); border-radius: 15px; cursor: pointer;
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-      box-shadow: 0 4px 0 var(--primary); margin-bottom: 10px;
-      color: var(--primary); background: #fff; transition: transform 0.08s;
-    }
-    .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--primary); }
-    .btn-primary { background: var(--accent); }
-    .btn-teal { background: var(--teal); color: #fff; }
-    .btn-danger { background: var(--danger); color: #fff; }
-    .btn-sm { padding: 9px 12px; font-size: 15px; margin-bottom: 0; }
-    .link-teacher { text-align: center; display: block; margin-top: 8px; font-weight: 700; text-decoration: underline; cursor: pointer; padding: 6px; }
-
-    /* Story */
-    .story-box { text-align: center; padding: 24px 16px; flex: 1; display: flex; flex-direction: column; justify-content: center; }
-    .story-icon { font-size: 62px; margin-bottom: 12px; }
-    .story-text { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
-    .dots { display: flex; justify-content: center; gap: 8px; margin-bottom: 18px; }
-    .dot { width: 11px; height: 11px; border-radius: 50%; background: #cbd5e1; border: 2px solid var(--primary); }
-    .dot.active { background: var(--accent); width: 26px; border-radius: 8px; }
-
-    /* Form & Hero */
-    label { font-weight: 800; display: block; margin-bottom: 5px; font-size: 16px; }
-    input[type="text"], input[type="password"], select {
-      width: 100%; padding: 12px 14px; font-size: 17px; font-weight: 700;
-      border: 3px solid var(--primary); border-radius: 12px; margin-bottom: 12px; background: #f8fafc;
-    }
-    .class-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-bottom: 12px; }
-    .class-item { border: 3px solid var(--primary); border-radius: 14px; padding: 10px; background: #fff; cursor: pointer; }
-    .class-item.selected { background: #fff3c4; box-shadow: 0 3px 0 var(--primary); }
-    .avatar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
-    .avatar-item { font-size: 30px; background: #fff; border: 3px solid var(--primary); border-radius: 13px; padding: 7px 0; text-align: center; cursor: pointer; }
-    .avatar-item.selected { background: var(--accent); transform: scale(1.06); }
-
-    /* HUD */
-    .hud {
-      display: flex; justify-content: space-between; align-items: center;
-      background: #fff; border: 3px solid var(--primary); border-radius: 15px;
-      padding: 9px 12px; margin-bottom: 12px; box-shadow: 0 3px 0 var(--primary);
-    }
-    .hud-user { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 15px; }
-    .hud-stats { display: flex; gap: 9px; font-weight: 800; font-size: 15px; }
-
-    /* 6 Stages Map */
-    .stage-card {
-      background: #fff; border: 3px solid var(--primary); border-radius: 16px;
-      padding: 13px; margin-bottom: 11px; box-shadow: 0 4px 0 var(--primary);
-    }
-    .stage-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-    .stage-icon { font-size: 34px; }
-    .stage-title { font-weight: 900; font-size: 18px; }
-    .stage-desc { font-size: 13px; color: #475569; font-weight: 600; }
-    .diff-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-    .diff-btn {
-      padding: 9px 6px; border: 2.5px solid var(--primary); border-radius: 12px;
-      font-weight: 800; font-size: 14px; cursor: pointer; text-align: center;
-      box-shadow: 0 2.5px 0 var(--primary);
-    }
-    .diff-btn:active { transform: translateY(2px); }
-    .d-easy { background: #dcfce7; color: #166534; }
-    .d-med { background: #fef9c3; color: #854d0e; }
-    .d-hard { background: #fee2e2; color: #991b1b; }
-
-    /* Quiz Elements */
-    .math-frac { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; margin: 0 3px; font-size: 0.92em; line-height: 1.08; }
-    .math-frac > span:first-child { border-bottom: 2px solid currentColor; padding: 0 3px; }
-    .math-frac > span:last-child { padding: 0 3px; }
-
-    .question-box { font-size: 19px; font-weight: 800; margin: 8px 0 14px; line-height: 1.45; }
-    .option-btn {
-      width: 100%; text-align: left; background: #fff; border: 3px solid var(--primary);
-      border-radius: 13px; padding: 13px 14px; font-size: 17px; font-weight: 700;
-      margin-bottom: 9px; cursor: pointer; display: flex; align-items: center; gap: 10px;
-      box-shadow: 0 3px 0 var(--primary);
-    }
-    .option-btn.correct { background: var(--success-light); border-color: var(--success); color: #14532d; }
-    .option-btn.wrong { background: var(--danger-light); border-color: var(--danger); color: #7f1d1d; }
-    .option-btn.eliminated { opacity: 0.32; pointer-events: none; text-decoration: line-through; }
-    .option-prefix {
-      min-width: 30px; height: 30px; border-radius: 8px; background: #f1f5f9;
-      border: 2px solid var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 900;
-    }
-
-    /* Matching & Ordering & Number Line */
-    .match-row { display: grid; grid-template-columns: 1fr 1.2fr; gap: 8px; align-items: center; margin-bottom: 8px; background: #f8fafc; padding: 8px; border-radius: 10px; border: 2px solid #cbd5e1; }
-    .match-row select { margin-bottom: 0; padding: 8px; font-size: 15px; }
-
-    .order-item {
-      display: flex; justify-content: space-between; align-items: center;
-      background: #f8fafc; border: 2.5px solid var(--primary); border-radius: 12px;
-      padding: 10px 12px; margin-bottom: 8px; font-weight: 800; font-size: 17px;
-    }
-    .order-arrows button {
-      border: 2px solid var(--primary); background: #fff; border-radius: 8px;
-      padding: 5px 10px; font-weight: 900; font-size: 16px; cursor: pointer; margin-left: 4px;
-    }
-
-    .nl-wrapper { background: #f8fafc; border: 2.5px solid var(--primary); border-radius: 14px; padding: 14px 8px; margin-bottom: 12px; text-align: center; }
-    .nl-track { position: relative; height: 64px; margin: 14px 16px; display: flex; align-items: center; }
-    .nl-line { position: absolute; left: 0; right: 0; height: 4px; background: var(--primary); top: 30px; }
-    .nl-ticks { position: relative; width: 100%; display: flex; justify-content: space-between; z-index: 2; }
-    .nl-tick {
-      width: 26px; height: 54px; display: flex; flex-direction: column; align-items: center;
-      cursor: pointer; position: relative;
-    }
-    .nl-mark { width: 3px; height: 14px; background: var(--primary); margin-top: 23px; }
-    .nl-mark.major { width: 4px; height: 22px; margin-top: 19px; background: #0f172a; }
-    .nl-lbl { font-size: 14px; font-weight: 900; margin-top: 3px; }
-    .nl-pin {
-      position: absolute; top: -4px; width: 22px; height: 22px; border-radius: 50%;
-      background: var(--danger); border: 2.5px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.4);
-    }
-
-    /* Boss & Timer */
-    .boss-bar { background: #fee2e2; border: 2.5px solid var(--danger); border-radius: 12px; padding: 8px 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; font-weight: 800; color: #991b1b; }
-    .timer-bar { background: #fef3c7; border: 2.5px solid #d97706; border-radius: 12px; padding: 8px 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; font-weight: 900; color: #92400e; }
-
-    /* Explanation */
-    .explain-card { border: 3px solid var(--primary); border-radius: 15px; padding: 14px; margin-top: 10px; margin-bottom: 12px; }
-    .explain-card.is-correct { background: #ecfdf5; border-color: var(--success); }
-    .explain-card.is-wrong { background: #fff7ed; border-color: #ea580c; }
-    .step-box { background: #fff; border-left: 4px solid var(--teal); padding: 9px 11px; border-radius: 8px; margin-bottom: 8px; font-size: 15px; }
-    .mistake-box { background: #fef2f2; border-left: 4px solid var(--danger); padding: 9px 11px; border-radius: 8px; font-size: 14px; color: #7f1d1d; }
-
-    /* Badges & Teacher */
-    .badge-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .badge-card { border: 2.5px solid var(--primary); border-radius: 14px; padding: 11px; text-align: center; background: #fff; }
-    .badge-card.locked { opacity: 0.45; filter: grayscale(1); }
-    .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
-    .stat-box { background: var(--teal-light); border: 2px solid var(--teal); border-radius: 12px; padding: 9px 5px; text-align: center; }
-    .stat-num { font-size: 22px; font-weight: 900; color: var(--teal); }
-    .stat-lbl { font-size: 12px; font-weight: 700; }
-    .bar-item { margin-bottom: 10px; }
-    .bar-label { display: flex; justify-content: space-between; font-size: 14px; font-weight: 700; margin-bottom: 3px; }
-    .bar-track { background: #e2e8f0; height: 13px; border-radius: 7px; overflow: hidden; }
-    .bar-fill { height: 100%; background: var(--danger); }
-    table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    th, td { border-bottom: 1.5px solid #cbd5e1; padding: 7px 5px; text-align: left; }
-    th { background: var(--teal-light); color: var(--teal); font-weight: 800; }
-    .tag-warn { display: inline-block; background: #fef3c7; border: 1px solid #d97706; color: #92400e; padding: 2px 5px; border-radius: 5px; font-size: 12px; font-weight: 700; margin: 2px; }
-  </style>
-</head>
-<body>
-<div class="app">
-
-  <!-- MÀN HÌNH 1: TRANG CHỦ -->
-  <div id="screen-home" class="screen active">
-    <div class="logo-q">ℚ</div>
-    <div class="game-title">Vương Quốc<br>Hữu Tỉ</div>
-    <div class="subtitle">Hành trình của Hiệp sĩ Toán học • Toán 7<br>(Kết nối tri thức với cuộc sống)</div>
-
-    <div class="card" style="text-align:center; font-weight:700; font-size:16px;">
-      Giáo viên: <strong>Trần Thị Thu Chẳng</strong><br>
-      Trường THCS Nam Đàn
-    </div>
-
-    <div style="text-align:center; font-size:30px; letter-spacing:8px; margin: 4px 0 16px;">
-      🏘️ ⛲ 🎪 🌉 🗼 🐺
-    </div>
-
-    <button id="btn-continue" class="btn btn-primary" style="display:none;" onclick="continueGame()">
-      ▶ Chơi tiếp: <span id="saved-name"></span>
-    </button>
-    <button class="btn" onclick="startStory()">⚔️ Tạo nhân vật mới</button>
-    <button class="btn btn-sm" style="background:#f1f5f9;" onclick="toggleSound()">
-      <span id="sound-status">🔊 Âm thanh: Bật</span>
-    </button>
-
-    <a class="link-teacher" onclick="openTeacherAuth()">Dành cho giáo viên (Thống kê kết quả) →</a>
-  </div>
-
-  <!-- MÀN HÌNH 2: 4 SLIDE CỐT TRUYỆN -->
-  <div id="screen-story" class="screen">
-    <div class="card story-box">
-      <div id="story-icon" class="story-icon">📜</div>
-      <div id="story-title" style="font-weight:900; font-size:20px; color:var(--teal); margin-bottom:10px;"></div>
-      <div id="story-text" class="story-text"></div>
-      <div class="dots" id="story-dots"></div>
-      <button class="btn btn-primary" onclick="nextStorySlide()">Tiếp tục →</button>
-    </div>
-  </div>
-
-  <!-- MÀN HÌNH 3: TẠO HIỆP SĨ -->
-  <div id="screen-create" class="screen">
-    <div class="card">
-      <h2 style="margin-top:0; text-align:center; font-size:21px;">🛡️ Thiết Lập Hồ Sơ Hiệp Sĩ</h2>
-      <label>Bước 1 – Tên nhân vật:</label>
-      <input type="text" id="inp-name" placeholder="Ví dụ: Minh Anh, An, Bình...">
-
-      <label>Bước 2 – Lớp của em:</label>
-      <input type="text" id="inp-class" placeholder="Ví dụ: 7A1">
-
-      <label>Bước 3 – Chọn Lớp nhân vật (Kỹ năng đặc biệt):</label>
-      <div class="class-grid">
-        <div class="class-item selected" onclick="selectHeroClass('Chiến binh', this)">
-          <div style="font-weight:800; font-size:15px;">🛡️ Chiến binh</div>
-          <div style="font-size:12px; color:#334155;">Giáp dày: Có tối đa 7 tim thay vì 5 tim mặc định.</div>
-        </div>
-        <div class="class-item" onclick="selectHeroClass('Pháp sư', this)">
-          <div style="font-weight:800; font-size:15px;">🔮 Pháp sư</div>
-          <div style="font-size:12px; color:#334155;">Thần chú: Nhận 2 lần gợi ý miễn phí mỗi chặng.</div>
-        </div>
-        <div class="class-item" onclick="selectHeroClass('Thám hiểm', this)">
-          <div style="font-weight:800; font-size:15px;">🔭 Thám hiểm</div>
-          <div style="font-size:12px; color:#334155;">Ống nhòm: Tự động loại bỏ 1 đáp án sai (50:50).</div>
-        </div>
-        <div class="class-item" onclick="selectHeroClass('Thợ rèn', this)">
-          <div style="font-weight:800; font-size:15px;">🔨 Thợ rèn</div>
-          <div style="font-size:12px; color:#334155;">Khiên rèn: Đỡ đòn lần trả lời sai đầu tiên, không mất tim.</div>
-        </div>
-      </div>
-
-      <label>Bước 4 – Chọn Hình đại diện (Avatar):</label>
-      <div class="avatar-grid" id="avatar-grid"></div>
-
-      <button class="btn btn-primary" onclick="finishCreateHero()">🚀 Lên đường!</button>
-      <button class="btn btn-sm" onclick="showScreen('screen-home')">← Quay lại</button>
-    </div>
-  </div>
-
-  <!-- MÀN HÌNH 4: BẢN ĐỒ 6 CHẶNG (TỰ CHỌN DỄ - THƯỜNG - KHÓ) -->
-  <div id="screen-map" class="screen">
-    <div class="hud">
-      <div class="hud-user">
-        <span id="hud-avatar" style="font-size:28px;">🦊</span>
-        <div>
-          <div id="hud-name">Hiệp sĩ</div>
-          <div id="hud-sub" style="font-size:12px; color:#475569;">7A1 • Chiến binh</div>
-        </div>
-      </div>
-      <div class="hud-stats">
-        <span>❤️ <span id="hud-hearts">5</span></span>
-        <span>⭐ <span id="hud-stars">0</span></span>
-      </div>
-    </div>
-
-    <div style="display:flex; gap:8px; margin-bottom:10px;">
-      <button class="btn btn-sm" style="background:#fff3c4;" onclick="openBadges()">🏆 Huy hiệu (<span id="badge-count">0</span>/7)</button>
-      <button class="btn btn-sm" onclick="showScreen('screen-home')">🏠 Trang chủ</button>
-    </div>
-
-    <div class="card" style="background:#fffbeb; padding:11px 13px; font-size:14px;">
-      🦉 <strong>Cụ Cú Mèo:</strong> “Chào Hiệp sĩ! Hãy chọn mức độ phù hợp (<strong>Dễ, Thường hoặc Khó</strong>) ở từng chặng trong 6 chặng để giải cứu dân làng!”
-    </div>
-
-    <div id="stages-list"></div>
-  </div>
-
-  <!-- MÀN HÌNH 5: LÀM BÀI TẬP 6 CHẶNG -->
-  <div id="screen-quiz" class="screen">
-    <div class="hud">
-      <div class="hud-user">
-        <button class="btn btn-sm" style="padding:5px 9px;" onclick="exitQuiz()">← Bản đồ</button>
-        <span id="quiz-stage-title" style="font-size:14px;">Chặng 1</span>
-      </div>
-      <div class="hud-stats">
-        <span>❤️ <span id="quiz-hearts">5</span></span>
-        <span>⭐ <span id="quiz-stars">0</span></span>
-      </div>
-    </div>
-
-    <!-- Thanh đếm ngược Chặng 3 -->
-    <div id="timer-box" class="timer-bar" style="display:none;">
-      <span>⏱️ Đấu trí Phiên chợ (Sai −3s)</span>
-      <span style="font-size:19px;"><span id="timer-val">60</span>s</span>
-    </div>
-
-    <!-- Thanh máu Boss Chặng 6 -->
-    <div id="boss-box" class="boss-bar" style="display:none;">
-      <span>🐺 BOSS: Sói Lạc Số</span>
-      <span id="boss-hp">❤️❤️❤️❤️</span>
-    </div>
-
-    <div class="card">
-      <div style="display:flex; justify-content:space-between; align-items:center; font-weight:800; margin-bottom:8px;">
-        <span>Câu <span id="q-num">1</span> / 4</span>
-        <span id="q-diff-badge" style="padding:3px 10px; border-radius:12px; border:2px solid var(--primary); font-size:13px;">Mức Dễ</span>
-      </div>
-
-      <div id="skill-bar" style="margin-bottom:8px; font-size:14px; font-weight:700; color:var(--teal);"></div>
-
-      <div id="q-prompt" class="question-box"></div>
-
-      <!-- Khu vực tương tác động theo từng loại câu hỏi -->
-      <div id="q-interactive"></div>
-
-      <!-- Lời giải từng bước & Lỗi sai thường gặp -->
-      <div id="explain-area" style="display:none;"></div>
-
-      <button id="btn-next-q" class="btn btn-primary" style="display:none; margin-top:10px;" onclick="nextQuestion()">
-        Câu tiếp theo →
-      </button>
-    </div>
-  </div>
-
-  <!-- MÀN HÌNH 6: TỔNG KẾT CHẶNG & TIÊN HỒI SINH -->
-  <div id="screen-summary" class="screen">
-    <div class="card" style="text-align:center; padding:22px 15px;">
-      <div style="font-size:58px;" id="sum-icon">🎉</div>
-      <h2 id="sum-title" style="margin:8px 0;">Hoàn thành Chặng!</h2>
-      <p id="sum-desc" style="font-size:16px; font-weight:600;"></p>
-      <div id="sum-badge" style="background:#fef9c3; border:2px solid var(--primary); border-radius:12px; padding:10px; margin:12px 0; font-weight:800; display:none;"></div>
-      <button id="btn-retry-stage" class="btn btn-teal" style="display:none;" onclick="retryCurrentStage()">💖 Tiên Hồi Sinh / Làm lại chặng này</button>
-      <button class="btn btn-primary" onclick="showScreen('screen-map'); renderMap();">🗺️ Quay về Bản đồ 6 Chặng</button>
-    </div>
-  </div>
-
-  <!-- MÀN HÌNH 7: KHO HUY HIỆU -->
-  <div id="screen-badges" class="screen">
-    <div class="card">
-      <h2 style="margin-top:0; text-align:center;">🏆 Huy Hiệu Hiệp Sĩ</h2>
-      <div class="badge-grid" id="badge-grid"></div>
-      <button class="btn btn-primary" style="margin-top:14px;" onclick="showScreen('screen-map')">← Quay lại Bản đồ</button>
-    </div>
-  </div>
-
-  <!-- MÀN HÌNH 8: ĐĂNG NHẬP GIÁO VIÊN -->
-  <div id="screen-teacher-login" class="screen">
-    <div class="card">
-      <h2 style="margin-top:0; text-align:center;">🔐 Trang Giáo Viên</h2>
-      <p style="text-align:center; font-size:15px;">Giáo viên: <strong>Trần Thị Thu Chẳng</strong><br>Trường THCS Nam Đàn</p>
-      <label>Mật khẩu truy cập:</label>
-      <input type="password" id="teacher-pass" placeholder="Mặc định: namdan7">
-      <button class="btn btn-teal" onclick="loginTeacher()">📊 Mở Thống Kê Kết Quả</button>
-      <button class="btn btn-sm" onclick="showScreen('screen-home')">← Quay lại Trang chủ</button>
-    </div>
-  </div>
-
-  <!-- MÀN HÌNH 9: THỐNG KÊ GIÁO VIÊN -->
-  <div id="screen-teacher" class="screen">
-    <div class="card">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-        <h2 style="margin:0; font-size:19px;">📊 Thống Kê Kết Quả</h2>
-        <button class="btn btn-sm" style="width:auto;" onclick="showScreen('screen-home')">Thoát</button>
-      </div>
-      <div style="font-size:14px; color:#475569; margin-bottom:10px;">GV: <strong>Trần Thị Thu Chẳng</strong> • Trường THCS Nam Đàn</div>
-
-      <div style="display:flex; gap:8px; margin-bottom:12px;">
-        <select id="filter-class" style="margin-bottom:0; flex:1;" onchange="renderTeacherDashboard()">
-          <option value="ALL">Tất cả các lớp</option>
-        </select>
-        <button class="btn btn-teal btn-sm" style="width:auto;" onclick="loadTeacherData()">🔄 Tải kết quả</button>
-      </div>
-
-      <div class="stat-row">
-        <div class="stat-box"><div class="stat-num" id="st-students">0</div><div class="stat-lbl">HS đã chơi</div></div>
-        <div class="stat-box"><div class="stat-num" id="st-questions">0</div><div class="stat-lbl">Câu đã làm</div></div>
-        <div class="stat-box"><div class="stat-num" id="st-accuracy">0%</div><div class="stat-lbl">Tỉ lệ đúng</div></div>
-      </div>
-
-      <h3 style="font-size:16px; margin:12px 0 8px;">📉 Thống kê lượt sai theo 6 chặng</h3>
-      <div id="stage-bars"></div>
-
-      <h3 style="font-size:16px; margin:14px 0 8px;">🆘 Học sinh cần hỗ trợ ở từng chặng</h3>
-      <div style="overflow-x:auto; margin-bottom:14px;">
-        <table>
-          <thead><tr><th>Chặng thử thách</th><th>Học sinh cần hỗ trợ</th></tr></thead>
-          <tbody id="support-table"></tbody>
-        </table>
-      </div>
-
-      <h3 style="font-size:16px; margin:14px 0 8px;">🏆 Bảng xếp hạng học sinh</h3>
-      <div style="overflow-x:auto;">
-        <table>
-          <thead><tr><th>Hiệp sĩ</th><th>Lớp</th><th>⭐ Sao</th><th>Đúng/Làm</th><th>Chặng yếu nhất</th></tr></thead>
-          <tbody id="ranking-table"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-</div>
-
+﻿<!DOCTYPE html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Vương quốc Hữu Tỉ</title>
+<style>
+*{box-sizing:border-box;margin:0}
+body{font-family:system-ui,'Segoe UI',sans-serif;color:#fff;min-height:100vh;background:linear-gradient(#171a45,#35276a 55%,#d9748a) fixed;overflow-x:hidden}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(2px 2px at 20% 30%,#fff,transparent),radial-gradient(2px 2px at 70% 15%,#fff,transparent),radial-gradient(1.5px 1.5px at 45% 60%,#fff,transparent),radial-gradient(2px 2px at 85% 50%,#fff,transparent);animation:tw 3s infinite alternate}
+@keyframes tw{to{opacity:.3}}@keyframes pop{from{transform:scale(.88);opacity:0}}@keyframes fl{50%{transform:translateY(-8px)}}@keyframes sk{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}@keyframes fall{to{transform:translateY(105vh) rotate(360deg)}}
+#app{max-width:560px;margin:auto;padding:14px;position:relative}
+h2,h3{font-family:Georgia,serif;margin:6px 0}.c{text-align:center}
+.card{background:rgba(255,255,255,.13);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.28);border-radius:20px;padding:16px;margin:10px 0;animation:pop .35s}
+.big{font-size:64px;animation:fl 2.5s infinite}.tx{font-size:18px;line-height:1.55;margin:10px 0}.sm{opacity:.85;font-size:14px}
+.btn{display:block;width:100%;margin-top:10px;padding:13px;border:0;border-radius:14px;font:700 16px inherit;background:linear-gradient(#ffd86b,#ffb02e);color:#3b2a00;cursor:pointer;box-shadow:0 4px 0 #b97a0a}
+.btn:active{transform:translateY(3px);box-shadow:none}.ghost{background:rgba(255,255,255,.2);color:#fff;box-shadow:none}
+input{width:100%;padding:12px;margin:6px 0;border-radius:12px;border:0;font-size:16px}
+.opt{display:block;width:100%;text-align:left;margin:7px 0;padding:12px;border-radius:14px;border:2px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);color:#fff;font-size:16px;cursor:pointer}
+.opt.sel{border-color:#ffd86b;background:rgba(255,216,107,.3)}.opt.cor{background:#1fa971;border-color:#1fa971}.opt.bad{background:#d64545;border-color:#d64545;animation:sk .3s}.opt.rm{opacity:.25}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.g4 .opt{text-align:center;font-size:28px;padding:8px}
+.bar{display:flex;justify-content:space-between;background:rgba(0,0,0,.3);border-radius:14px;padding:8px 12px;font-weight:700;font-size:14px}
+.hp{margin:6px 0;font-weight:700;color:#ffd86b}.st{background:rgba(0,0,0,.18);border-radius:12px;padding:8px;margin:6px 0}
+.zz{display:flex;flex-direction:column}.nd{width:46%;margin:6px 0;padding:10px;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;border:3px solid #ffd86b;background:linear-gradient(#7c5cff,#4b2fc9);color:#fff;font-size:30px;cursor:pointer;animation:pop .4s}
+.nd small{display:block;font-size:11px}.nd.dn{background:linear-gradient(#1fc98a,#0f8f63)}.nd.lk{filter:grayscale(1);opacity:.5;cursor:default}
+.fb{margin-top:12px;padding:12px;border-radius:14px;line-height:1.5}.fb.ok{background:rgba(31,169,113,.35)}.fb.no{background:rgba(214,69,69,.35)}
+.wr{background:rgba(0,0,0,.2);border-radius:12px;padding:8px;margin:6px 0;font-size:14px;text-align:left}
+#mu{position:fixed;top:10px;right:10px;z-index:9;border:0;border-radius:50%;width:42px;height:42px;font-size:20px;background:rgba(0,0,0,.4);color:#fff}
+#fx span{position:fixed;top:-30px;font-size:26px;animation:fall 2.2s linear forwards;z-index:8}
+</style></head><body><button id="mu" onclick="mt()">🔊</button><div id="app"></div><div id="fx"></div>
+<script src="questions.js"></script>
 <script>
-// Link Google Apps Script Web App mới nhất đã được tích hợp chuẩn xác
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxq39sidp-FJP95RteRlc5Uke-00zds1M2ttBvEYPnvi7E9DfyMf2VZb8bhXky4Ag4/exec";
-
-// ==================== 1. CẤU HÌNH CỐT TRUYỆN & 6 CHẶNG ====================
-const STORY_SLIDES = [
-  { icon: "🏫", title: "Thông tin Giáo viên", text: "Trò chơi giáo dục Toán 7: Vương Quốc Hữu Tỉ.\nGiáo viên: Trần Thị Thu Chẳng – Trường THCS Nam Đàn." },
-  { icon: "🌈", title: "Bối cảnh Vương Quốc", text: "“Vương quốc Hữu Tỉ từng yên bình, nơi mọi phân số sống hoà thuận trên trục số.”" },
-  { icon: "😈", title: "Biến cố ập đến!", text: "“Một đêm, Quỷ Sai Dấu và Phù thủy Mẫu Số kéo đến. Chúng làm dấu trừ biến mất, bắt các phân số cộng mà không quy đồng, rồi phong ấn cả vùng đất.”" },
-  { icon: "⚔️", title: "Sứ mệnh Hiệp sĩ", text: "“Chỉ một Hiệp sĩ Toán học mới phá được phong ấn. Người đó chính là em!”" }
-];
-
-const AVATARS = [
-  { icon: "🦊", name: "Cáo" }, { icon: "🐯", name: "Hổ" }, { icon: "🐼", name: "Gấu trúc" }, { icon: "🐸", name: "Ếch xanh" },
-  { icon: "🦁", name: "Sư tử" }, { icon: "🐨", name: "Gấu Koala" }, { icon: "🐧", name: "Chim cánh cụt" }, { icon: "🦄", name: "Kỳ lân" },
-  { icon: "🐲", name: "Rồng xanh" }, { icon: "🐱", name: "Mèo vàng" }, { icon: "🐶", name: "Cún con" }, { icon: "🐵", name: "Khỉ con" }
-];
-
-const STAGES = [
-  { id: 1, name: "Chặng 1: Cổng làng", icon: "🏘️", desc: "Khái niệm số hữu tỉ, phân số bằng nhau", badge: "Huy hiệu Người Mở Cổng" },
-  { id: 2, name: "Chặng 2: Giếng số đối", icon: "⛲", desc: "Tìm số đối của số hữu tỉ", badge: "Huy hiệu Bậc Thầy Số Đối" },
-  { id: 3, name: "Chặng 3: Đấu trí ở phiên chợ", icon: "🎪", desc: "Giới hạn 60 giây • Sai bị trừ 3 giây", badge: "Huy hiệu Thương Nhân Nhanh Trí" },
-  { id: 4, name: "Chặng 4: Cầu trục số", icon: "🌉", desc: "Biểu diễn số hữu tỉ trên trục số", badge: "Huy hiệu Hoa Tiêu Trục Số" },
-  { id: 5, name: "Chặng 5: Tháp so sánh", icon: "🗼", desc: "So sánh & sắp xếp số hữu tỉ", badge: "Huy hiệu Mắt Thần Tháp Canh" },
-  { id: 6, name: "Chặng 6: Hang sói (BOSS)", icon: "🐺", desc: "Đấu trí trực tiếp với Boss Sói Lạc Số", badge: "Huy hiệu Dũng Sĩ Diệt Sói" }
-];
-
-function f(tu, mau) {
-  return `<span class="math-frac"><span>${tu}</span><span>${mau}</span></span>`;
-}
-
-// ==================== 2. NGÂN HÀNG 72 CÂU HỎI ĐÚNG KỊCH BẢN ====================
-const QUESTIONS = {
-  1: {
-    easy: [
-      { type: 'mcq', q: 'Tập hợp các số hữu tỉ được kí hiệu là gì?', opts: ['ℤ', 'ℝ', 'ℕ', 'ℚ'], ans: 3, hint: 'Chữ cái in hoa bắt đầu từ Quotient (Thương).', steps: 'Bước 1: Nhớ kí hiệu các tập hợp số đã học: ℕ (số tự nhiên), ℤ (số nguyên), ℚ (số hữu tỉ).<br>Bước 2: Vậy tập hợp các số hữu tỉ kí hiệu là ℚ.', mistake: 'Nhầm lẫn giữa ℤ (tập số nguyên) và ℚ (tập số hữu tỉ).' },
-      { type: 'mcq', q: `Số nào sau đây KHÔNG phải là số hữu tỉ?`, opts: ['0', f('-3','4'), f('5','0'), '1,25'], ans: 2, hint: 'Số hữu tỉ viết được dưới dạng a/b với b ≠ 0.', steps: `Bước 1: Số hữu tỉ có dạng ${f('a','b')} với a, b ∈ ℤ và b ≠ 0.<br>Bước 2: Phân số ${f('5','0')} có mẫu số bằng 0 nên không có nghĩa và không phải số hữu tỉ.`, mistake: 'Tưởng số thập phân 1,25 hoặc số 0 không phải số hữu tỉ.' },
-      { type: 'mcq', q: 'Số nguyên −5 có phải là số hữu tỉ không?', opts: ['Đúng (vì −5 = −5/1)', 'Sai (vì −5 không có mẫu số)'], ans: 0, hint: 'Mọi số nguyên a đều viết được dưới dạng a/1.', steps: `Bước 1: Ta có thể viết −5 = ${f('-5','1')}.<br>Bước 2: Vì −5, 1 ∈ ℤ và 1 ≠ 0 nên −5 là một số hữu tỉ. Chọn Đúng.`, mistake: 'Nghĩ rằng số nguyên không viết được dưới dạng phân số.' },
-      { type: 'mcq', q: 'Trong các số sau, số nào là số hữu tỉ dương?', opts: [f('-2','3'), '0', f('3','4'), '−5'], ans: 2, hint: 'Số hữu tỉ dương là số hữu tỉ lớn hơn 0.', steps: `Bước 1: Số ${f('-2','3')} và −5 là số hữu tỉ âm (< 0); số 0 không là số hữu tỉ dương cũng không là số hữu tỉ âm.<br>Bước 2: Số ${f('3','4')} > 0 nên là số hữu tỉ dương.`, mistake: 'Nhầm số 0 là số hữu tỉ dương.' }
-    ],
-    medium: [
-      { type: 'mcq', q: 'Số hữu tỉ nào sau đây là số hữu tỉ âm?', opts: [f('-4','-9'), f('-3','-5'), f('0','-3'), f('2','-7')], ans: 3, hint: 'Phân số có tử và mẫu trái dấu là số hữu tỉ âm.', steps: `Bước 1: ${f('-4','-9')} = ${f('4','9')} > 0; ${f('-3','-5')} = ${f('3','5')} > 0; ${f('0','-3')} = 0.<br>Bước 2: Phân số ${f('2','-7')} có tử dương, mẫu âm nên là số hữu tỉ âm.`, mistake: 'Nhầm (−4)/(−9) là số âm vì thấy có dấu trừ ở tử và mẫu.' },
-      { type: 'input', q: 'Viết số thập phân −0,25 dưới dạng phân số tối giản (ví dụ: -1/2):', accepted: ['-1/4'], displayAns: f('-1','4'), hint: '−0,25 = −25/100, chia cả tử và mẫu cho 25.', steps: `Bước 1: Đổi số thập phân ra phân số thập phân: −0,25 = ${f('-25','100')}.<br>Bước 2: Rút gọn cả tử và mẫu cho 25: ${f('-25 : 25','100 : 25')} = ${f('-1','4')}.`, mistake: 'Viết −25/100 nhưng quên rút gọn về phân số tối giản.' },
-      { type: 'match', q: 'Ghép mỗi số thập phân ở cột trái với phân số tối giản bằng nó ở cột phải:', lefts: ['0,75', '−1,5', '0,2', '−0,125'], rights: [f('-1','8'), f('3','4'), f('-3','2'), f('1','5')], ansMap: [1, 2, 3, 0], hint: '0,75 = 75/100 = 3/4; −1,5 = −15/10 = −3/2.', steps: `Bước 1: 0,75 = ${f('75','100')} = ${f('3','4')}.<br>Bước 2: −1,5 = ${f('-15','10')} = ${f('-3','2')}.<br>Bước 3: 0,2 = ${f('2','10')} = ${f('1','5')}.<br>Bước 4: −0,125 = ${f('-125','1000')} = ${f('-1','8')}.`, mistake: 'Nhầm dấu của −1,5 và −0,125.' },
-      { type: 'mcq', q: `Hỗน số −2${f('1','3')} viết dưới dạng phân số là:`, opts: [f('-5','3'), f('-7','3'), f('7','3'), f('-6','3')], ans: 1, hint: 'Giữ nguyên dấu trừ đằng trước, đổi 2 1/3 = (2.3 + 1)/3 = 7/3.', steps: `Bước 1: Đổi phần số dương: 2${f('1','3')} = ${f('2 . 3 + 1','3')} = ${f('7','3')}.<br>Bước 2: Đặt dấu trừ đằng trước ta được −2${f('1','3')} = ${f('-7','3')}.`, mistake: 'Tính (−2).3 + 1 = −5 nên ra đáp án sai là −5/3.' }
-    ],
-    hard: [
-      { type: 'mcq', q: `Phân số nào biểu diễn cùng một số hữu tỉ với ${f('-2','5')}?`, opts: [f('-4','-10'), f('6','-15'), f('2','-10'), f('-5','2')], ans: 1, hint: 'Nhân cả tử và mẫu của −2/5 với −3.', steps: `Bước 1: Ta có ${f('-2','5')} = ${f('(-2) . (-3)','5 . (-3)')} = ${f('6','-15')}.<br>Bước 2: Các phân số còn lại rút gọn lần lượt là ${f('2','5')}, ${f('-1','5')}, ${f('-5','2')} ≠ ${f('-2','5')}.`, mistake: 'Chọn (−4)/(−10) vì quên hai dấu trừ chia nhau thành số dương 2/5.' },
-      { type: 'match', q: 'Ghép mỗi phân số với số thập phân bằng nó:', lefts: [f('-7','4'), f('3','8'), f('-9','20'), f('6','25')], rights: ['−1,75', '0,24', '0,375', '−0,45'], ansMap: [0, 2, 3, 1], hint: 'Chia tử cho mẫu hoặc đưa về mẫu 100, 1000.', steps: `Bước 1: ${f('-7','4')} = −1,75.<br>Bước 2: ${f('3','8')} = 0,375.<br>Bước 3: ${f('-9','20')} = ${f('-45','100')} = −0,45.<br>Bước 4: ${f('6','25')} = ${f('24','100')} = 0,24.`, mistake: 'Tính nhầm 3 : 8 = 0,38.' },
-      { type: 'mcq', q: 'Bắt lỗi sai: Bạn Hà viết −0,75 thành phân số tối giản như sau:<br>−0,75 → Bước 1: = −75/100 → Bước 2: = −15/20 → Bước 3: = −3/5.<br>Bước đầu tiên nào bị sai?', opts: ['Bước 1', 'Bước 2', 'Bước 3', 'Không bước nào sai'], ans: 2, hint: 'Kiểm tra phép chia 20 : 5 ở Bước 3.', steps: `Bước 1: −0,75 = ${f('-75','100')} (Đúng).<br>Bước 2: Chia tử và mẫu cho 5 được ${f('-15','20')} (Đúng).<br>Bước 3: Chia tử và mẫu cho 5 phải được ${f('-3','4')}, bạn Hà viết ${f('-3','5')} là SAI ở Bước 3.`, mistake: 'Chia nhẩm 20 : 5 = 5 thay vì 4.' },
-      { type: 'input', q: `Tìm số nguyên x thỏa mãn: ${f('-7','3')} < x < ${f('-5','3')}`, accepted: ['-2'], displayAns: '−2', hint: '−7/3 = −2,33... và −5/3 = −1,66...', steps: `Bước 1: Đổi ra hỗn số: ${f('-7','3')} = −2${f('1','3')} và ${f('-5','3')} = −1${f('2','3')}.<br>Bước 2: Số nguyên duy nhất nằm giữa −2${f('1','3')} và −1${f('2','3')} là x = −2.`, mistake: 'Không tìm được vì nghĩ −7 và −5 chỉ có −6 ở giữa (quên chia cho mẫu 3: −6/3 = −2).' }
-    ]
-  },
-  2: {
-    easy: [
-      { type: 'mcq', q: 'Số đối của 5 là:', opts: ['5', '−5', f('1','5'), f('-1','5')], ans: 1, hint: 'Số đối của a là −a.', steps: 'Bước 1: Hai số đối nhau có tổng bằng 0.<br>Bước 2: Số đối của 5 là −5 (vì 5 + (−5) = 0).', mistake: 'Nhầm số đối với số nghịch đảo 1/5.' },
-      { type: 'mcq', q: `Số đối của ${f('-1','2')} là:`, opts: ['2', '−2', f('1','2'), f('-1','2')], ans: 2, hint: 'Đổi dấu phân số −1/2 thành số dương.', steps: `Bước 1: Số đối của số hữu tỉ âm ${f('-1','2')} là số hữu tỉ dương ${f('1','2')}.`, mistake: 'Nhầm sang số nghịch đảo −2 hoặc 2.' },
-      { type: 'input', q: 'Số đối của 0 là bao nhiêu?', accepted: ['0'], displayAns: '0', hint: '0 + 0 = 0.', steps: 'Bước 1: Số đối của 0 là chính số 0 (vì 0 + 0 = 0).', mistake: 'Viết −0 (không dùng kí hiệu −0).' },
-      { type: 'mcq', q: `Số đối của ${f('2','3')} là:`, opts: [f('3','2'), f('2','3'), f('-3','2'), f('-2','3')], ans: 3, hint: 'Thêm dấu trừ đằng trước 2/3.', steps: `Bước 1: Số đối của ${f('2','3')} là −${f('2','3')} = ${f('-2','3')}.`, mistake: 'Vừa đổi dấu vừa nghịch đảo thành −3/2.' }
-    ],
-    medium: [
-      { type: 'input', q: `Số đối của ${f('-3','8')} là bao nhiêu? (Nhập dạng a/b)`, accepted: ['3/8'], displayAns: f('3','8'), hint: 'Đổi dấu −3/8 thành phân số dương.', steps: `Bước 1: Số đối của ${f('-3','8')} là −(${f('-3','8')}) = ${f('3','8')}.`, mistake: 'Giữ nguyên dấu âm hoặc đảo thành 8/3.' },
-      { type: 'input', q: `Tổng của ${f('-5','8')} và số đối của nó bằng bao nhiêu?`, accepted: ['0'], displayAns: '0', hint: 'Hai số đối nhau luôn có tổng bằng 0.', steps: `Bước 1: Số đối của ${f('-5','8')} là ${f('5','8')}.<br>Bước 2: Tổng của chúng là ${f('-5','8')} + ${f('5','8')} = 0.`, mistake: 'Tính cộng nhầm thành −10/8.' },
-      { type: 'input', q: `Số đối của ${f('-4','3')} là bao nhiêu? (Nhập dạng a/b)`, accepted: ['4/3'], displayAns: f('4','3'), hint: 'Đổi dấu từ âm sang dương.', steps: `Bước 1: Số đối của ${f('-4','3')} là ${f('4','3')}.`, mistake: 'Viết thành 3/4.' },
-      { type: 'match', q: 'Ghép mỗi số ở cột trái với số đối của nó ở cột phải:', lefts: [f('-1','8'), '0,5', f('-9','5'), f('8','7')], rights: [f('-8','7'), f('1','8'), f('-1','2'), f('9','5')], ansMap: [1, 2, 3, 0], hint: '0,5 = 1/2 nên số đối của 0,5 là −1/2.', steps: `Bước 1: Số đối của ${f('-1','8')} là ${f('1','8')}.<br>Bước 2: Số đối của 0,5 là −0,5 = ${f('-1','2')}.<br>Bước 3: Số đối của ${f('-9','5')} là ${f('9','5')}.<br>Bước 4: Số đối của ${f('8','7')} là ${f('-8','7')}.`, mistake: 'Không nhận ra −1/2 chính là −0,5.' }
-    ],
-    hard: [
-      { type: 'input', q: 'Số đối của 0,8 là bao nhiêu? (Nhập số thập phân hoặc phân số tối giản)', accepted: ['-0,8', '-0.8', '-4/5'], displayAns: '−0,8 hoặc ' + f('-4','5'), hint: 'Thêm dấu trừ trước 0,8 (hoặc −4/5).', steps: `Bước 1: Số đối của 0,8 là −0,8.<br>Bước 2: Nếu viết dưới dạng phân số tối giản thì −0,8 = ${f('-4','5')}.`, mistake: 'Viết 0,8 hoặc −8/10 chưa rút gọn.' },
-      { type: 'mcq', q: 'Số đối của −0,75 là:', opts: [f('3','4'), f('-4','3'), f('4','3'), f('-3','4')], ans: 0, hint: '−0,75 = −3/4, số đối của nó là 3/4.', steps: `Bước 1: Đổi −0,75 = ${f('-3','4')}.<br>Bước 2: Số đối của ${f('-3','4')} là ${f('3','4')}.`, mistake: 'Chọn −3/4 (chưa đổi dấu).' },
-      { type: 'mcq', q: `Bạn Bình tính số đối của số đối của số đối của ${f('2','3')}. Kết quả cuối cùng là bao nhiêu?`, opts: [f('2','3'), f('-2','3'), f('3','2'), f('-3','2')], ans: 1, hint: '3 lần đổi dấu liên tiếp: Dương → Âm → Dương → Âm.', steps: `Bước 1: Số đối lần 1 của ${f('2','3')} là ${f('-2','3')}.<br>Bước 2: Số đối lần 2 của ${f('-2','3')} là ${f('2','3')}.<br>Bước 3: Số đối lần 3 của ${f('2','3')} là ${f('-2','3')}.`, mistake: 'Đếm nhầm số lần đổi dấu thành kết quả dương 2/3.' },
-      { type: 'input', q: 'Tìm x biết số đối của x bằng −0,63:', accepted: ['0,63', '0.63', '63/100'], displayAns: '0,63', hint: '−x = −0,63 suy ra x = 0,63.', steps: `Bước 1: Số đối của x là −x.<br>Bước 2: Theo đề bài: −x = −0,63 ⇒ x = 0,63 (hoặc ${f('63','100')}).`, mistake: 'Viết x = −0,63.' }
-    ]
-  },
-  3: {
-    easy: [
-      { type: 'mcq', q: 'So sánh −3 và 2:', opts: ['−3 < 2', '−3 > 2', '−3 = 2'], ans: 0, hint: 'Số âm luôn nhỏ hơn số dương.', steps: 'Bước 1: −3 < 0 và 2 > 0 nên −3 < 2.', mistake: 'So sánh 3 > 2 mà quên dấu âm.' },
-      { type: 'mcq', q: 'Số đối của 7 là:', opts: ['7', '−7', f('1','7'), '0'], ans: 1, hint: 'Thêm dấu trừ trước 7.', steps: 'Bước 1: Số đối của 7 là −7.', mistake: 'Chọn 1/7.' },
-      { type: 'mcq', q: `So sánh ${f('1','5')} và ${f('4','5')}:`, opts: [`${f('1','5')} > ${f('4','5')}`, `${f('1','5')} < ${f('4','5')}`, `${f('1','5')} = ${f('4','5')}`], ans: 1, hint: 'Cùng mẫu dương 5, tử 1 < 4.', steps: `Bước 1: Vì 1 < 4 và mẫu 5 > 0 nên ${f('1','5')} < ${f('4','5')}.`, mistake: 'Nhầm dấu < và >.' },
-      { type: 'mcq', q: 'Số nào lớn nhất trong các số: −5 ; 0 ; −1 ; 3?', opts: ['−5', '0', '−1', '3'], ans: 3, hint: 'Chỉ có 3 là số dương.', steps: 'Bước 1: Trong các số đã cho, 3 là số dương duy nhất nên 3 lớn nhất.', mistake: 'Chọn −5.' }
-    ],
-    medium: [
-      { type: 'mcq', q: `So sánh ${f('-2','3')} và ${f('5','2')}:`, opts: [`${f('-2','3')} < ${f('5','2')}`, `${f('-2','3')} > ${f('5','2')}`, `${f('-2','3')} = ${f('5','2')}`], ans: 0, hint: 'Số hữu tỉ âm nhỏ hơn số hữu tỉ dương.', steps: `Bước 1: ${f('-2','3')} < 0 < ${f('5','2')} nên ${f('-2','3')} < ${f('5','2')}.`, mistake: 'Quy đồng mất thời gian trong vòng thi tốc độ 60 giây.' },
-      { type: 'mcq', q: `So sánh ${f('-4','5')} và ${f('-1','5')}:`, opts: [`${f('-4','5')} < ${f('-1','5')}`, `${f('-4','5')} > ${f('-1','5')}`, `${f('-4','5')} = ${f('-1','5')}`], ans: 0, hint: 'So sánh hai tử số âm: −4 < −1.', steps: `Bước 1: Hai phân số cùng mẫu dương 5, vì −4 < −1 nên ${f('-4','5')} < ${f('-1','5')}.`, mistake: 'Nhầm −4 > −1.' },
-      { type: 'order', q: 'Sắp xếp các số sau theo thứ tự GIẢM DẦN (số lớn nhất ở trên cùng):', items: ['1', f('2','3'), f('-1','5'), f('-5','4')], correctOrder: ['1', f('2','3'), f('-1','5'), f('-5','4')], hint: 'Số dương xếp trước (1 > 2/3), sau đó đến số âm (−1/5 > −5/4).', steps: `Bước 1: So sánh số dương: 1 > ${f('2','3')}.<br>Bước 2: So sánh số âm: ${f('-1','5')} = −0,2 > −1,25 = ${f('-5','4')}.<br>Bước 3: Thứ tự giảm dần: 1 → ${f('2','3')} → ${f('-1','5')} → ${f('-5','4')}.`, mistake: 'Xếp nhầm thứ tự tăng dần thay vì giảm dần.' },
-      { type: 'mcq', q: `Số đối của ${f('-9','5')} là:`, opts: [f('-5','9'), f('5','9'), f('-9','5'), f('9','5')], ans: 3, hint: 'Đổi dấu từ âm sang dương.', steps: `Bước 1: Số đối của ${f('-9','5')} là ${f('9','5')}.`, mistake: 'Đảo ngược thành 5/9.' }
-    ],
-    hard: [
-      { type: 'mcq', q: `So sánh ${f('-1','8')} và ${f('-3','24')}:`, opts: [`${f('-1','8')} < ${f('-3','24')}`, `${f('-1','8')} > ${f('-3','24')}`, `${f('-1','8')} = ${f('-3','24')}`], ans: 2, hint: 'Rút gọn phân số −3/24 cho 3.', steps: `Bước 1: Rút gọn ${f('-3','24')} = ${f('-3 : 3','24 : 3')} = ${f('-1','8')}.<br>Bước 2: Vậy hai số hữu tỉ bằng nhau.`, mistake: 'Thấy 3 > 1 nên vội chọn −1/8 > −3/24.' },
-      { type: 'order', q: 'Sắp xếp các số theo thứ tự TĂNG DẦN (bé nhất ở trên cùng):', items: [f('9','7'), '−0,75', f('13','7'), f('-1','9'), f('13','10')], correctOrder: ['−0,75', f('-1','9'), f('9','7'), f('13','10'), f('13','7')], hint: 'So sánh nhóm âm (−0,75 < −1/9) rồi đến nhóm dương (9/7 ≈ 1,28 < 13/10 = 1,3 < 13/7 ≈ 1,85).', steps: `Bước 1: Nhóm số âm: −0,75 = −${f('3','4')} < −${f('1','9')}.<br>Bước 2: Nhóm số dương: ${f('9','7')} = ${f('90','70')} < ${f('13','10')} = ${f('91','70')} < ${f('13','7')}.<br>Bước 3: Thứ tự tăng dần: −0,75 → ${f('-1','9')} → ${f('9','7')} → ${f('13','10')} → ${f('13','7')}.`, mistake: 'Nhầm giữa 9/7 và 13/10.' },
-      { type: 'mcq', q: `So sánh ${f('-7','8')} và ${f('4','9')}:`, opts: [`${f('-7','8')} < ${f('4','9')}`, `${f('-7','8')} > ${f('4','9')}`, `${f('-7','8')} = ${f('4','9')}`], ans: 0, hint: 'Số âm luôn nhỏ hơn số dương.', steps: `Bước 1: ${f('-7','8')} < 0 và ${f('4','9')} > 0 ⇒ ${f('-7','8')} < ${f('4','9')}.`, mistake: 'Quên dấu trừ ở −7/8.' },
-      { type: 'mcq', q: `So sánh ${f('7','8')} và ${f('4','9')}:`, opts: [`${f('7','8')} < ${f('4','9')}`, `${f('7','8')} > ${f('4','9')}`, `${f('7','8')} = ${f('4','9')}`], ans: 1, hint: 'So sánh trung gian với 1/2: 7/8 > 1/2 và 4/9 < 1/2.', steps: `Bước 1: Ta có ${f('7','8')} > ${f('4','8')} = ${f('1','2')}.<br>Bước 2: Còn ${f('4','9')} < ${f('4,5','9')} = ${f('1','2')}.<br>Bước 3: Vậy ${f('7','8')} > ${f('4','9')}.`, mistake: 'Quy đồng mẫu 72 mất nhiều thời gian.' }
-    ]
-  },
-  4: {
-    easy: [
-      { type: 'numline', q: 'Chạm vào vạch biểu diễn số −2 trên trục số:', min: -3, max: 3, divs: 1, targetTick: 1, displayAns: 'Tại vạch số −2 (bên trái số 0 hai đơn vị)', hint: 'Số −2 nằm bên trái số 0 đúng 2 đơn vị.', steps: 'Bước 1: Từ điểm 0 đi sang bên trái 2 đơn vị.<br>Bước 2: Điểm đó chính là vạch số −2.', mistake: 'Đặt nhầm sang điểm +2 bên phải số 0.' },
-      { type: 'numline', q: `Chạm vào vạch biểu diễn số ${f('1','2')} trên trục số (mỗi đơn vị chia 2 phần):`, min: -2, max: 2, divs: 2, targetTick: 5, displayAns: 'Vạch chính giữa đoạn từ 0 đến 1', hint: '1/2 nằm chính giữa 0 và 1.', steps: `Bước 1: Mỗi đơn vị chia thành 2 phần bằng nhau.<br>Bước 2: Số ${f('1','2')} nằm ở vạch thứ 1 bên phải số 0 (chính giữa 0 và 1).`, mistake: 'Đặt tại vạch số 1 hoặc số 2.' },
-      { type: 'mcq', q: 'Trên trục số nằm ngang, số hữu tỉ âm nằm ở phía nào của điểm 0?', opts: ['Bên phải điểm 0', 'Bên trái điểm 0', 'Trùng với điểm 0'], ans: 1, hint: 'Chiều dương hướng từ trái sang phải.', steps: 'Bước 1: Trên trục số nằm ngang, các điểm biểu diễn số hữu tỉ âm nằm bên trái điểm 0.', mistake: 'Nhầm bên trái và bên phải.' },
-      { type: 'numline', q: `Chạm vào vạch biểu diễn số ${f('-1','2')} trên trục số (mỗi đơn vị chia 2 phần):`, min: -2, max: 2, divs: 2, targetTick: 3, displayAns: 'Vạch chính giữa đoạn từ −1 đến 0', hint: '−1/2 nằm bên trái số 0 một nửa đơn vị.', steps: `Bước 1: Từ điểm 0 đi sang bên trái 1 phần (mỗi đơn vị chia 2 phần).<br>Bước 2: Điểm đó nằm chính giữa đoạn từ −1 đến 0.`, mistake: 'Đặt nhầm ở giữa −2 và −1.' }
-    ],
-    medium: [
-      { type: 'mcq', q: `Trên trục số, điểm biểu diễn số ${f('-5','2')} nằm giữa hai số nguyên nào?`, opts: ['−2 và −1', '−3 và −2', '−5 và −4', '2 và 3'], ans: 1, hint: '−5/2 = −2,5 nằm giữa −3 và −2.', steps: `Bước 1: Đổi ${f('-5','2')} = −2,5.<br>Bước 2: Vì −3 < −2,5 < −2 nên điểm biểu diễn nằm giữa hai số nguyên −3 và −2.`, mistake: 'Tưởng −2,5 nằm giữa −2 và −1.' },
-      { type: 'numline', q: `Chạm vào vạch biểu diễn số ${f('-3','2')} trên trục số (mỗi đơn vị chia 4 phần):`, min: -2, max: 1, divs: 4, targetTick: 2, displayAns: 'Vạch chính giữa đoạn từ −2 đến −1 (cách 0 sang trái 6 vạch nhỏ)', hint: '−3/2 = −6/4, đếm từ 0 sang trái 6 vạch nhỏ.', steps: `Bước 1: Quy đồng về mẫu 4: ${f('-3','2')} = ${f('-6','4')}.<br>Bước 2: Từ điểm 0 đi sang bên trái 6 vạch nhỏ (chính giữa −2 và −1).`, mistake: 'Chỉ đếm sang trái 3 vạch nhỏ (tức là −3/4).' },
-      { type: 'numline', q: `Chạm vào vạch biểu diễn số ${f('5','2')} trên trục số (mỗi đơn vị chia 2 phần):`, min: 0, max: 3, divs: 2, targetTick: 5, displayAns: 'Vạch chính giữa đoạn từ 2 đến 3', hint: '5/2 = 2,5 nằm giữa 2 và 3.', steps: `Bước 1: Đổi ${f('5','2')} = 2${f('1','2')}.<br>Bước 2: Từ điểm 0 đi sang phải 5 vạch nhỏ (chính giữa 2 và 3).`, mistake: 'Đặt tại vạch số 2.' },
-      { type: 'numline', q: `Chạm vào vạch biểu diễn số ${f('5','4')} trên trục số (mỗi đơn vị chia 4 phần):`, min: 0, max: 2, divs: 4, targetTick: 5, displayAns: 'Vạch thứ 5 tính từ 0 sang phải (1 vạch nhỏ sau số 1)', hint: '5/4 = 1 + 1/4.', steps: `Bước 1: Mỗi đơn vị chia 4 phần bằng nhau, mỗi vạch nhỏ ứng với ${f('1','4')}.<br>Bước 2: Đếm từ 0 sang phải 5 vạch nhỏ (ngay sau số 1 một vạch).`, mistake: 'Đặt tại vạch thứ 4 (số 1).' }
-    ],
-    hard: [
-      { type: 'numline', q: `Chạm vào vạch biểu diễn số ${f('1','4')} trên trục số (mỗi đơn vị chia 4 phần):`, min: -1, max: 2, divs: 4, targetTick: 5, displayAns: 'Vạch thứ 1 tính từ 0 sang phải', hint: 'Từ điểm 0 tiến sang phải 1 vạch nhỏ.', steps: `Bước 1: Xác định điểm 0 trên trục số.<br>Bước 2: Tiến sang bên phải 1 vạch nhỏ (trong 4 phần của đơn vị đầu tiên).`, mistake: 'Đếm từ vạch −1 thay vì vạch 0.' },
-      { type: 'numline', q: `Chạm vào vạch biểu diễn số ${f('-2','3')} trên trục số (mỗi đơn vị chia 3 phần):`, min: -2, max: 1, divs: 3, targetTick: 4, displayAns: 'Vạch thứ 2 tính từ 0 sang trái', hint: 'Từ điểm 0 lùi sang trái 2 vạch nhỏ.', steps: `Bước 1: Mỗi đơn vị chia 3 phần bằng nhau.<br>Bước 2: Vì là số âm, từ điểm 0 đi sang bên trái 2 vạch nhỏ.`, mistake: 'Đếm từ −1 sang phải 2 vạch (thành −1/3).' },
-      { type: 'numline', q: `Chạm vào vạch biểu diễn số ${f('7','3')} trên trục số (mỗi đơn vị chia 3 phần):`, min: 0, max: 3, divs: 3, targetTick: 7, displayAns: 'Vạch thứ 1 ngay sau số 2 về bên phải (vì 7/3 = 2 + 1/3)', hint: '7/3 = 2 + 1/3.', steps: `Bước 1: Viết dưới dạng hỗn số: ${f('7','3')} = 2${f('1','3')}.<br>Bước 2: Từ điểm 2 đi sang bên phải thêm 1 vạch nhỏ (tức vạch thứ 7 từ 0).`, mistake: 'Đặt tại vạch thứ 1 sau số 1 (tức 4/3).' },
-      { type: 'numline', q: `Chạm vào vạch biểu diễn số ${f('4','3')} trên trục số (mỗi đơn vị chia 3 phần):`, min: 0, max: 3, divs: 3, targetTick: 4, displayAns: 'Vạch thứ 1 ngay sau số 1 về bên phải (vì 4/3 = 1 + 1/3)', hint: '4/3 = 1 + 1/3.', steps: `Bước 1: Viết ${f('4','3')} = 1${f('1','3')}.<br>Bước 2: Từ điểm 1 đi sang bên phải thêm 1 vạch nhỏ (vạch thứ 4 tính từ 0).`, mistake: 'Đặt tại vạch số 1.' }
-    ]
-  },
-  5: {
-    easy: [
-      { type: 'mcq', q: `So sánh ${f('-5','3')} và ${f('2','5')}:`, opts: [`${f('-5','3')} < ${f('2','5')}`, `${f('-5','3')} > ${f('2','5')}`, `${f('-5','3')} = ${f('2','5')}`], ans: 0, hint: 'Số hữu tỉ âm nhỏ hơn số hữu tỉ dương.', steps: `Bước 1: ${f('-5','3')} < 0 và ${f('2','5')} > 0 nên ${f('-5','3')} < ${f('2','5')}.`, mistake: 'Nhìn 5 > 2 nên chọn >.' },
-      { type: 'order', q: 'Sắp xếp các số theo thứ tự TĂNG DẦN (bé nhất ở trên):', items: ['−1', f('-1','3'), '0,5', f('3','4')], correctOrder: ['−1', f('-1','3'), '0,5', f('3','4')], hint: '−1 < −1/3 < 0,5 (tức 2/4) < 3/4.', steps: `Bước 1: So sánh số âm: −1 < −${f('1','3')}.<br>Bước 2: So sánh số dương: 0,5 = ${f('2','4')} < ${f('3','4')}.<br>Bước 3: Thứ tự tăng dần: −1 → ${f('-1','3')} → 0,5 → ${f('3','4')}.`, mistake: 'Nhầm −1/3 < −1.' },
-      { type: 'mcq', q: `So sánh ${f('-3','7')} và ${f('-5','7')}:`, opts: [`${f('-3','7')} < ${f('-5','7')}`, `${f('-3','7')} > ${f('-5','7')}`, `${f('-3','7')} = ${f('-5','7')}`], ans: 1, hint: '−3 > −5 nên −3/7 > −5/7.', steps: `Bước 1: Cùng mẫu dương 7, so sánh tử số: vì −3 > −5 nên ${f('-3','7')} > ${f('-5','7')}.`, mistake: 'Nhầm −3 < −5.' },
-      { type: 'mcq', q: "Khẳng định 'Mọi số hữu tỉ âm đều nhỏ hơn 0' là Đúng hay Sai?", opts: ['Đúng', 'Sai'], ans: 0, hint: 'Trên trục số, số hữu tỉ âm nằm bên trái số 0.', steps: 'Bước 1: Theo định nghĩa, số hữu tỉ nhỏ hơn 0 gọi là số hữu tỉ âm. Vậy khẳng định Đúng.', mistake: 'Nhầm lẫn khái niệm.' }
-    ],
-    medium: [
-      { type: 'order', q: 'Sắp xếp các số theo thứ tự TĂNG DẦN:', items: [f('-1','10'), '−1', f('1','6'), '2'], correctOrder: ['−1', f('-1','10'), f('1','6'), '2'], hint: '−1 < −0,1 < 1/6 < 2.', steps: `Bước 1: Số âm: −1 < −${f('1','10')}.<br>Bước 2: Số dương: ${f('1','6')} < 2.<br>Bước 3: Thứ tự tăng dần: −1 → ${f('-1','10')} → ${f('1','6')} → 2.`, mistake: 'Xếp −1/10 đứng trước −1.' },
-      { type: 'order', q: 'Sắp xếp các số theo thứ tự GIẢM DẦN (lớn nhất ở trên):', items: [f('1','6'), f('-1','2'), f('-3','4'), f('-2','3')], correctOrder: [f('1','6'), f('-1','2'), f('-2','3'), f('-3','4')], hint: 'Quy đồng các số âm với mẫu 12: −6/12 > −8/12 > −9/12.', steps: `Bước 1: Số dương ${f('1','6')} lớn nhất.<br>Bước 2: Quy đồng ba số âm: ${f('-1','2')} = ${f('-6','12')}; ${f('-2','3')} = ${f('-8','12')}; ${f('-3','4')} = ${f('-9','12')}.<br>Bước 3: Vì −6 > −8 > −9 nên thứ tự giảm dần là: ${f('1','6')} → ${f('-1','2')} → ${f('-2','3')} → ${f('-3','4')}.`, mistake: 'So sánh ngược chiều các số âm.' },
-      { type: 'mcq', q: `Trong các khẳng định sau, khẳng định nào SAI?<br>(1) ${f('-1','2')} < ${f('-1','3')} &nbsp;|&nbsp; (2) ${f('3','4')} > ${f('4','5')} &nbsp;|&nbsp; (3) −0,6 = ${f('-3','5')} &nbsp;|&nbsp; (4) ${f('-5','6')} > ${f('-6','7')}`, opts: ['Khẳng định (1)', 'Khẳng định (2)', 'Khẳng định (3)', 'Khẳng định (4)'], ans: 1, hint: 'So sánh 3/4 = 15/20 và 4/5 = 16/20.', steps: `Bước 1: Kiểm tra (2): ${f('3','4')} = ${f('15','20')} và ${f('4','5')} = ${f('16','20')}. Vì 15 < 16 nên ${f('3','4')} < ${f('4','5')}.<br>Bước 2: Vậy khẳng định (2) viết ${f('3','4')} > ${f('4','5')} là SAI.`, mistake: 'Nhầm (4) sai vì không quy đồng −35/42 > −36/42.' },
-      { type: 'order', q: 'Sắp xếp các số theo thứ tự TĂNG DẦN:', items: [f('-1','8'), f('-1','2'), '0,7', '−4,5'], correctOrder: ['−4,5', f('-1','2'), f('-1','8'), '0,7'], hint: '−4,5 < −0,5 (−1/2) < −0,125 (−1/8) < 0,7.', steps: `Bước 1: Đổi sang số thập phân: ${f('-1','2')} = −0,5; ${f('-1','8')} = −0,125.<br>Bước 2: So sánh: −4,5 < −0,5 < −0,125 < 0,7.<br>Bước 3: Thứ tự tăng dần: −4,5 → ${f('-1','2')} → ${f('-1','8')} → 0,7.`, mistake: 'Nhầm −0,125 < −0,5.' }
-    ],
-    hard: [
-      { type: 'order', q: `Sắp xếp các bước so sánh ${f('-3','4')} và ${f('-5','7')} theo đúng thứ tự từ trên xuống dưới:`, items: ['[A] So sánh hai tử số: −21 < −20.', `[B] Kết luận: ${f('-3','4')} < ${f('-5','7')}.`, `[C] Quy đồng: ${f('-3','4')} = ${f('-21','28')} và ${f('-5','7')} = ${f('-20','28')}.`, '[D] Chọn mẫu số chung dương là 28.'], correctOrder: ['[D] Chọn mẫu số chung dương là 28.', `[C] Quy đồng: ${f('-3','4')} = ${f('-21','28')} và ${f('-5','7')} = ${f('-20','28')}.`, '[A] So sánh hai tử số: −21 < −20.', `[B] Kết luận: ${f('-3','4')} < ${f('-5','7')}.`], hint: 'Chọn mẫu chung → Quy đồng → So sánh tử → Kết luận.', steps: 'Bước 1: [D] Chọn mẫu số chung dương là 28.<br>Bước 2: [C] Quy đồng mẫu số.<br>Bước 3: [A] So sánh hai tử số.<br>Bước 4: [B] Kết luận.', mistake: 'Đảo thứ tự bước quy đồng lên trước bước chọn mẫu chung.' },
-      { type: 'mcq', q: `So sánh ${f('-9','7')} và ${f('-27','21')}:`, opts: [`${f('-9','7')} < ${f('-27','21')}`, `${f('-9','7')} > ${f('-27','21')}`, `${f('-9','7')} = ${f('-27','21')}`], ans: 2, hint: 'Rút gọn phân số −27/21 cho 3.', steps: `Bước 1: Chia cả tử và mẫu của ${f('-27','21')} cho 3 ta được ${f('-9','7')}.<br>Bước 2: Vậy hai phân số bằng nhau.`, mistake: 'Nhìn 27 > 9 nên chọn >.' },
-      { type: 'order', q: 'Sắp xếp các số theo thứ tự TĂNG DẦN:', items: [f('2','7'), f('-1','8'), '0', f('-5','3'), '−1,25'], correctOrder: [f('-5','3'), '−1,25', f('-1','8'), '0', f('2','7')], hint: '−5/3 ≈ −1,66 < −1,25 < −0,125 (−1/8) < 0 < 2/7.', steps: `Bước 1: So sánh nhóm âm: ${f('-5','3')} = −1${f('2','3')} < −1,25 < −${f('1','8')}.<br>Bước 2: Tiếp theo là 0 và số dương ${f('2','7')}.<br>Bước 3: Thứ tự tăng dần: ${f('-5','3')} → −1,25 → ${f('-1','8')} → 0 → ${f('2','7')}.`, mistake: 'Nhầm −1,25 nhỏ hơn −5/3.' },
-      { type: 'order', q: 'Sắp xếp các số theo thứ tự TĂNG DẦN:', items: [f('7','9'), f('-1','3'), f('-11','8'), '−1', f('1','2')], correctOrder: [f('-11','8'), '−1', f('-1','3'), f('1','2'), f('7','9')], hint: '−11/8 = −1,375 < −1 < −1/3 < 1/2 < 7/9.', steps: `Bước 1: Nhóm âm: ${f('-11','8')} = −1${f('3','8')} < −1 < −${f('1','3')}.<br>Bước 2: Nhóm dương: ${f('1','2')} = ${f('9','18')} < ${f('14','18')} = ${f('7','9')}.<br>Bước 3: Thứ tự tăng dần: ${f('-11','8')} → −1 → ${f('-1','3')} → ${f('1','2')} → ${f('7','9')}.`, mistake: 'Đặt −1 trước −11/8.' }
-    ]
-  },
-  6: {
-    easy: [
-      { type: 'mcq', q: '🐺 Sói Lạc Số gầm gừ: “Tập hợp các số hữu tỉ được kí hiệu là gì?”', opts: ['ℤ', 'ℝ', 'ℕ', 'ℚ'], ans: 3, hint: 'Kí hiệu ℚ.', steps: 'Bước 1: Tập hợp số hữu tỉ kí hiệu là ℚ.', mistake: 'Chọn ℤ hoặc ℝ.' },
-      { type: 'input', q: '🐺 Sói Lạc Số hỏi: “Số đối của 0,5 là bao nhiêu?”', accepted: ['-0,5', '-0.5', '-1/2'], displayAns: '−0,5 hoặc ' + f('-1','2'), hint: 'Đổi dấu 0,5 thành số âm.', steps: `Bước 1: Số đối của 0,5 là −0,5 (hoặc ${f('-1','2')}).`, mistake: 'Nhập 0,5 hoặc 2.' },
-      { type: 'mcq', q: `🐺 Sói Lạc Số đố: “Số nào nhỏ hơn trong hai số ${f('-3','4')} và ${f('1','4')}?”`, opts: [f('-3','4'), f('1','4'), 'Bằng nhau'], ans: 0, hint: 'Số âm nhỏ hơn số dương.', steps: `Bước 1: ${f('-3','4')} < 0 < ${f('1','4')} nên ${f('-3','4')} nhỏ hơn.`, mistake: 'Nhìn 3 > 1 nên chọn sai.' },
-      { type: 'numline', q: `🐺 Sói Lạc Số thách: “Đặt điểm biểu diễn số ${f('-1','2')} lên trục số!”`, min: -2, max: 2, divs: 2, targetTick: 3, displayAns: 'Chính giữa đoạn từ −1 đến 0', hint: 'Chính giữa −1 và 0.', steps: `Bước 1: Điểm ${f('-1','2')} nằm chính giữa đoạn từ −1 đến 0.`, mistake: 'Đặt bên phải số 0.' }
-    ],
-    medium: [
-      { type: 'numline', q: `🐺 Sói Lạc Số thách: “Đặt điểm biểu diễn số ${f('5','4')} trên trục số (mỗi đơn vị chia 4 phần)!”`, min: 0, max: 2, divs: 4, targetTick: 5, displayAns: 'Vạch thứ 5 tính từ 0 sang phải', hint: '5/4 = 1 + 1/4.', steps: `Bước 1: Đếm từ 0 sang phải 5 vạch nhỏ (1 vạch sau số 1).`, mistake: 'Đặt tại số 1.' },
-      { type: 'input', q: `🐺 Sói Lạc Số hỏi: “Số đối của ${f('-3','8')} là bao nhiêu?”`, accepted: ['3/8'], displayAns: f('3','8'), hint: 'Đổi dấu thành phân số dương.', steps: `Bước 1: Số đối của ${f('-3','8')} là ${f('3','8')}.`, mistake: 'Giữ nguyên dấu trừ.' },
-      { type: 'order', q: '🐺 Sói Lạc Số đố: “Sắp xếp các số theo thứ tự GIẢM DẦN:”', items: [f('5','2'), f('9','8'), f('2','9'), f('2','3')], correctOrder: [f('5','2'), f('9','8'), f('2','3'), f('2','9')], hint: '5/2 = 2,5 > 9/8 = 1,125 > 2/3 (6/9) > 2/9.', steps: `Bước 1: ${f('5','2')} = 2,5 > 1; ${f('9','8')} = 1${f('1','8')} > 1.<br>Bước 2: Hai số nhỏ hơn 1: ${f('2','3')} = ${f('6','9')} > ${f('2','9')}.<br>Bước 3: Thứ tự giảm dần: ${f('5','2')} → ${f('9','8')} → ${f('2','3')} → ${f('2','9')}.`, mistake: 'Nhầm 2/9 > 2/3.' },
-      { type: 'order', q: '🐺 Sói Lạc Số thách: “Sắp xếp các số theo thứ tự TĂNG DẦN:”', items: [f('7','10'), f('2','9'), f('4','9'), f('-7','3')], correctOrder: [f('-7','3'), f('2','9'), f('4','9'), f('7','10')], hint: 'Số âm −7/3 bé nhất; sau đó 2/9 < 4/9 < 1/2 < 7/10.', steps: `Bước 1: Số âm ${f('-7','3')} bé nhất.<br>Bước 2: So sánh nhóm dương: ${f('2','9')} < ${f('4','9')} < ${f('1','2')} < ${f('7','10')}.<br>Bước 3: Thứ tự tăng dần: ${f('-7','3')} → ${f('2','9')} → ${f('4','9')} → ${f('7','10')}.`, mistake: 'Xếp 7/10 đứng trước 4/9.' }
-    ],
-    hard: [
-      { type: 'mcq', q: '🐺 Toán thực tế: Nhiệt độ lúc 6 giờ sáng: Sa Pa −1,5°C, Mẫu Sơn −2,3°C, Đà Lạt 8,2°C. Nơi nào lạnh nhất?', opts: ['Sa Pa (−1,5°C)', 'Đà Lạt (8,2°C)', 'Mẫu Sơn (−2,3°C)'], ans: 2, hint: 'Nơi lạnh nhất có nhiệt độ thấp nhất (số hữu tỉ bé nhất).', steps: 'Bước 1: So sánh nhiệt độ ba nơi: −2,3 < −1,5 < 8,2.<br>Bước 2: Vì −2,3°C nhỏ nhất nên Mẫu Sơn lạnh nhất.', mistake: 'Nhầm −1,5 < −2,3.' },
-      { type: 'mcq', q: '🐺 Bắt lỗi sai: Bạn Hà viết −0,75 = −75/100 = −15/20 = −3/5. Bước đầu tiên nào sai?', opts: ['Bước 1 (−75/100)', 'Bước 2 (−15/20)', 'Bước 3 (−3/5)'], ans: 2, hint: '−15/20 rút gọn cho 5 phải bằng −3/4.', steps: `Bước 1: Ở Bước 3, ${f('-15 : 5','20 : 5')} = ${f('-3','4')}, bạn Hà viết ${f('-3','5')} là sai.`, mistake: 'Chọn Bước 2.' },
-      { type: 'order', q: '🐺 Đòn quyết định! Sắp xếp tăng dần:', items: [f('7','9'), f('-1','3'), f('-11','8'), '−1', f('1','2')], correctOrder: [f('-11','8'), '−1', f('-1','3'), f('1','2'), f('7','9')], hint: '−11/8 < −1 < −1/3 < 1/2 < 7/9.', steps: `Bước 1: Nhóm âm: ${f('-11','8')} < −1 < ${f('-1','3')}.<br>Bước 2: Nhóm dương: ${f('1','2')} < ${f('7','9')}.`, mistake: 'Xếp sai vị trí −11/8 và −1.' },
-      { type: 'input', q: `🐺 Đòn kết liễu Boss! Tìm số nguyên x thỏa mãn: ${f('-7','3')} < x < ${f('-5','3')}`, accepted: ['-2'], displayAns: '−2', hint: '−2,33 < −2 < −1,66.', steps: `Bước 1: Ta có ${f('-7','3')} = −2${f('1','3')} và ${f('-5','3')} = −1${f('2','3')}.<br>Bước 2: Số nguyên x cần tìm là −2.`, mistake: 'Nhập −1 hoặc −3.' }
-    ]
-  }
-};
-
-// ==================== 3. TRẠNG THÁI GAME & LƯU TRỮ ====================
-let state = {
-  name: "", className: "", heroClass: "Chiến binh", avatar: "🦊",
-  hearts: 5, maxHearts: 5, stars: 0, correctCount: 0, totalAnswered: 0,
-  stageProgress: {},
-  wrongByStage: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 },
-  badges: []
-};
-
-let soundOn = true, storyIdx = 0;
-let curStage = 1, curDiff = 'easy', curQIdx = 0;
-let hintsLeft = 0, shieldActive = false, answeredCurrent = false;
-let timerInterval = null, timeLeft = 60, stageCorrectInRun = 0, bossHP = 4;
-let selectedNumlineTick = null, currentOrderList = [];
-
-function playTone(type) {
-  if (!soundOn) return;
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = ctx.createOscillator(), gain = ctx.createGain();
-    osc.connect(gain); gain.connect(ctx.destination);
-    if (type === 'correct') {
-      osc.frequency.setValueAtTime(523, ctx.currentTime);
-      osc.frequency.setValueAtTime(659, ctx.currentTime + 0.1);
-      gain.gain.setValueAtTime(0.14, ctx.currentTime);
-      osc.start(); osc.stop
+const API="https://script.google.com/macros/s/AKfycbzNG_mk2AgcAYPIX3S3J71vR5Vb5n3Spg0x2sfxBoWKdLM3QTJyuO7igiwD6YRZtIliMA/exec"; // ← DÁN LINK APPS SCRIPT (Web app) VÀO ĐÂY
+const $=id=>document.getElementById(id),app=$('app'),R=h=>{app.innerHTML=h;scrollTo(0,0)};
+const sh=a=>a.map(x=>[Math.random(),x]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]);
+const AV=['🦊','🐯','🐼','🐸','🦁','🐨','🐧','🦄','🐲','🐱','🐶','🐵'];
+const ROLES={'Chiến binh':['⚔️','7 Tim thay vì 5'],'Pháp sư':['🧙','2 gợi ý mỗi chặng'],'Thám hiểm':['🧭','Loại 1 đáp án nhiễu'],'Thợ rèn':['🔨','Khiên đỡ lần sai đầu']},RK=Object.keys(ROLES);
+const RN=['Làng Tập Hợp Q','Thành Bốn Phép Tính','Rừng Lũy Thừa','Núi Thứ Tự Và Chuyển Vế','Lâu Đài Phong Ấn'],RI=['🏘️','🏰','🌲','⛰️','👑'];
+const SN=['Khởi động','Vượt chướng ngại vật','Tăng tốc','Về đích (Boss)'],SI=['🏁','🧗','⚡','👹'];
+const BOSS=['Sói Lạc Số','Phù thủy Mẫu Số','Ma Rừng Lũy Thừa','Quỷ Sai Dấu','Đại Ma Vương'],TAG=['Khái niệm & trục số','Bốn phép tính','Lũy thừa','Thứ tự & chuyển vế','Tổng hợp'];
+const LV={d:'DỄ',t:'THƯỜNG',k:'KHÓ'},XPL={d:1,t:2,k:3};
+const SL=[['📚','Ôn tập Chương I – Số hữu tỉ (Toán 7)','GV biên soạn: Trần Thị Thu Chẳng – Trường THCS Nam Đàn'],['🌈','Vương quốc Hữu Tỉ từng yên bình, nơi mọi phân số sống hoà thuận trên trục số, giữ cho dòng chảy tri thức luôn cân bằng.'],['🌑','Một đêm, Quỷ Sai Dấu và Phù thủy Mẫu Số kéo đến. Chúng làm dấu trừ biến mất, bắt các phân số cộng mà không quy đồng, đảo lộn thứ tự phép tính rồi phong ấn cả năm vùng đất.'],['⚔️','Chỉ một Hiệp sĩ Toán học bản lĩnh mới phá được phong ấn. Người đó chính là em!']];
+let S=JSON.parse(localStorage.getItem('hs')||'null'),G={},T={};const save=()=>localStorage.setItem('hs',JSON.stringify(S));
+const stars=()=>Object.values(S.prog).reduce((a,b)=>a+b,0);
+/* ===== ÂM THANH (tự tổng hợp, không cần file mp3) ===== */
+let AC,mute=0,bgT;const NT=[261.6,293.7,329.6,392,440,523.3,587.3,659.3];
+function tone(f,t,ty,v,d){if(mute||!AC)return;d=d||0;const o=AC.createOscillator(),g=AC.createGain(),n=AC.currentTime+d;o.type=ty;o.frequency.value=f;g.gain.setValueAtTime(v,n);g.gain.exponentialRampToValueAtTime(.001,n+t);o.connect(g);g.connect(AC.destination);o.start(n);o.stop(n+t)}
+const sfx={ok:()=>[1,3,5].forEach((n,i)=>tone(NT[n],.2,'triangle',.1,i*.09)),no:()=>{tone(180,.3,'sawtooth',.05);tone(140,.3,'sawtooth',.05,.12)},star:()=>[4,5,6,7].forEach((n,i)=>tone(NT[n],.28,'triangle',.1,i*.12)),win:()=>[0,2,4,7,4,7].forEach((n,i)=>tone(NT[n],.35,'triangle',.1,i*.15))};
+function bg(){clearInterval(bgT);let i=0;const q=[0,2,4,2,5,4,2,1];bgT=setInterval(()=>{tone(NT[q[i%8]]/2,1.4,'sine',.04);if(i%2==0)tone(NT[q[(i+3)%8]],.9,'sine',.022);i++},900)}
+function mt(){mute=!mute;$('mu').textContent=mute?'🔇':'🔊'}
+function boom(){for(let i=0;i<30;i++){const s=document.createElement('span');s.textContent=['⭐','✨','🎉','💛'][i%4];s.style.left=Math.random()*100+'vw';s.style.animationDelay=Math.random()*.6+'s';$('fx').appendChild(s);setTimeout(()=>s.remove(),3200)}}
+/* ===== CỐT TRUYỆN & TẠO NHÂN VẬT ===== */
+function intro(){R(`<div class="card c"><div class=big>🛡️</div><h2>Vương quốc Hữu Tỉ</h2><p class=sm>Hành trình của Hiệp sĩ Toán học • Toán 7</p><button class=btn onclick="ac0()">▶ Bắt đầu</button></div>`)}
+function ac0(){AC=AC||new(window.AudioContext||window.webkitAudioContext)();AC.resume();bg();sl(0)}
+function sl(i){const[e,t,u]=SL[i];R(`<div class="card c"><div class=big>${e}</div><p class=tx>${t}</p>${u?`<p class=sm>${u}</p>`:''}<button class=btn onclick="${i<3?`sl(${i+1})`:S?'map()':'cr()'}">${i<3?'Tiếp ▶':S?'Chơi tiếp':'Tạo nhân vật'}</button></div>`)}
+function cr(){T={};R(`<div class=card><h2>Tạo Hiệp sĩ</h2><input id=nm placeholder="Tên nhân vật (VD: Minh Anh)"><input id=cl placeholder="Lớp (VD: 7A4)"><h3>Chọn lớp nhân vật</h3><div class=g2>${RK.map((k,i)=>`<button class=opt id=ro${i} onclick="pr(${i})">${ROLES[k][0]} <b>${k}</b><br><small>${ROLES[k][1]}</small></button>`).join('')}</div><h3>Chọn hình đại diện</h3><div class=g4>${AV.map((a,i)=>`<button class=opt id=av${i} onclick="pa(${i})">${a}</button>`).join('')}</div><button class=btn onclick="go()">Lên đường!</button></div>`)}
+function pr(i){T.role=RK[i];RK.forEach((_,j)=>$('ro'+j).classList.toggle('sel',j==i))}
+function pa(i){T.av=AV[i];AV.forEach((_,j)=>$('av'+j).classList.toggle('sel',j==i))}
+function go(){const n=$('nm').value.replace(/[<>&]/g,'').trim(),c=$('cl').value.replace(/[<>&\s]/g,'').toUpperCase();if(!n||!c||!T.role||!T.av)return alert('Em hãy nhập tên, lớp, chọn lớp nhân vật và hình đại diện nhé!');const m=T.role=='Chiến binh'?7:5;S={name:n,cls:c,role:T.role,av:T.av,max:m,hearts:m,xp:0,gold:0,prog:{},vault:[]};save();sfx.star();map()}
+/* ===== BẢN ĐỒ ===== */
+const hudIn=()=>`<span>${S.av} ${S.name} (${S.cls})</span><span>❤️${S.hearts}/${S.max}</span><span>⭐${stars()}</span><span>✨${S.xp}</span><span>🪙${S.gold}</span>`,hud=()=>`<div class=bar id=hd>${hudIn()}</div>`;
+const opn=(r,s)=>r==1&&s==1||(s>1?S.prog[r+'-'+(s-1)]:S.prog[(r-1)+'-4'])>0;
+function map(){let h=hud()+`<h2 class=c>🗺️ Bản đồ Vương quốc Hữu Tỉ</h2>`;for(let r=5;r>=1;r--){h+=`<div class=card><h3>${RI[r-1]} Vòng ${r}: ${RN[r-1]}</h3><div class=zz>`;for(let s=4;s>=1;s--){const st=S.prog[r+'-'+s]||0,o=opn(r,s);h+=`<button class="nd ${o?'':'lk'} ${st?'dn':''}" style="margin-left:${s%2?'6%':'48%'}" ${o?`onclick="lv(${r},${s})"`:'disabled'}>${o?SI[s-1]:'🔒'}<small>${SN[s-1]}<br>${'⭐'.repeat(st)||'&nbsp;'}</small></button>`}h+='</div></div>'}
+R(h+`<button class=btn onclick="vp()">📚 Kho Ôn Tập (${S.vault.length})</button><button class="btn ghost" onclick="if(confirm('Xoá nhân vật và tiến trình?')){localStorage.removeItem('hs');S=null;sl(0)}">Đổi nhân vật</button>`)}
+function lv(r,s){const k=l=>QB[r+'-'+s+'-'+l];R(hud()+`<div class="card c"><div class=big>${s==4?'👹':'🦉'}</div><p class=tx>${s==4?`${BOSS[r-1]}: “Ngươi không giải cứu được dân làng đâu!”`:`Cụ Cú Mèo: “Hãy chọn mức độ phù hợp với em ở ${SN[s-1]}!”`}</p><p class=sm>${['Không giới hạn thời gian. Có lời giải ngay sau mỗi câu.','Không giới hạn thời gian. Câu sai vào Kho Ôn Tập.','⏱ 60 giây, sai bị trừ 3 giây. Cần đúng ít nhất một nửa số câu.','Đúng 1 câu: Boss mất 1 máu. Sai: em mất 1 Tim.'][s-1]}</p>${Object.keys(LV).map(l=>`<button class=btn onclick="play(${r},${s},'${l}')">${LV[l]} (${k(l)?k(l).length+' câu':'chưa có'})</button>`).join('')}<button class="btn ghost" onclick="map()">◀ Bản đồ</button></div>`)}
+/* ===== CHƠI ===== */
+function play(r,s,l){const src=QB[r+'-'+s+'-'+l];if(!src)return alert('Chặng này chưa có câu hỏi. Thầy/cô thêm vào questions.js với khoá "'+r+'-'+s+'-'+l+'"');if(S.hearts<=0){S.hearts=2}
+G={r,s,l,q:sh(src.slice()),i:0,ok:0,w:[],tg:{},n:src.length,t0:Date.now(),hint:S.role=='Pháp sư'?2:0,sd:S.role=='Thợ rèn',time:60,boss:src.length};
+if(s==3)G.tm=setInterval(()=>{if(G.paused)return;G.time--;if($('tm'))$('tm').textContent=G.time;if(G.time<=0)end()},1000);ask()}
+function vp(){if(!S.vault.length)return alert('Kho Ôn Tập đang trống – em chưa sai câu nào!');G={v:1,r:1,s:1,l:'d',q:sh(S.vault.slice()),i:0,ok:0,w:[],tg:{},n:S.vault.length,hint:0};ask()}
+const val=s=>{s=(''+s).replace(/\s/g,'').replace(/,/g,'.').replace(/−/g,'-');if(s.includes('/')){const[a,b]=s.split('/');return a/b}return +s};
+function ask(){const q=G.rev||G.q[G.i];G.cur=q;G.done=0;G.paused=0;G.rm=-1;if(q.t=='mc'&&S.role=='Thám hiểm'&&q.o.length>2&&!G.v)do G.rm=Math.floor(Math.random()*q.o.length);while(G.rm==q.a);
+const top=G.v?'📚 Kho Ôn Tập':`${RI[G.r-1]} ${SN[G.s-1]} • ${LV[G.l]}`,pg=G.v?`Còn ${G.q.length-G.i} câu`:G.s==4?`${BOSS[G.r-1]} ${'❤️'.repeat(Math.max(0,G.boss))}${'🖤'.repeat(Math.max(0,G.n-G.boss))}`:G.s==3?`⏱ <b id=tm>${G.time}</b> giây`:`Câu ${G.i+1}/${G.n}`;
+R(`<div class=bar id=hd>${hudIn()}</div><div class=card><div class=sm>${top}</div><div class=hp>${pg}</div>${G.rev?'<div class=hp>🧚 Tiên Hồi Sinh: giải lại câu vừa sai để hồi 2 Tim!</div>':''}<h3 style="font-family:inherit;line-height:1.5">${q.q}</h3>${BODY[q.t](q)}${S.role=='Pháp sư'&&!G.v?`<button class="btn ghost" id=hb onclick="hint()">💡 Gợi ý (${G.hint})</button><div id=hn class=sm></div>`:''}<div id=fb></div></div>`)}
+function hint(){if(G.hint<=0||G.done)return;G.hint--;$('hb').textContent='💡 Gợi ý ('+G.hint+')';$('hn').textContent=G.cur.h||'Đọc kĩ đề, đổi về cùng dạng (phân số/thập phân) rồi làm từng bước, chú ý dấu.'}
+const BODY={
+mc:q=>q.o.map((t,i)=>`<button class="opt ${i==G.rm?'rm':''}" id=o${i} ${i==G.rm?'disabled':''} onclick="ck(${i})">${t}</button>`).join(''),
+fill:q=>`<input id=fi placeholder="Nhập đáp số..." onkeydown="event.key=='Enter'&&cf()"><button class=btn onclick="cf()">Kiểm tra</button>`,
+match:q=>{G.m={l:null,p:{}};return `<div class=sm>Chạm một ô bên trái, rồi chạm ô tương ứng bên phải</div><div class=g2><div>${q.L.map((t,i)=>`<button class=opt id=l${i} onclick="ml(${i})">${t}</button>`).join('')}</div><div>${q.R.map((t,i)=>`<button class=opt id=r${i} onclick="mr(${i})">${t}</button>`).join('')}</div></div>`},
+order:q=>{G.o=[];return `<div class=hp id=ol>&nbsp;</div>`+sh(q.o.map((_,i)=>i)).map(i=>`<button class=opt id=p${i} onclick="po(${i})">${q.o[i]}</button>`).join('')+`<button class="btn ghost" onclick="ur()">↺ Chọn lại</button>`},
+tfm:q=>{G.t=[];return q.s.map((t,i)=>`<div class=st>${t}<div class=g2><button class=opt id=t${i}1 onclick="pt(${i},1)">Đúng</button><button class=opt id=t${i}0 onclick="pt(${i},0)">Sai</button></div></div>`).join('')+`<button class=btn onclick="ct()">Kiểm tra</button>`},
+nl:q=>{G.sel=null;const n=(q.hi-q.lo)*q.den,u=460/n;let h=`<div class=sm>Chạm vào vạch em chọn rồi bấm Xác nhận</div><svg viewBox="0 0 520 100" style="width:100%"><line x1="15" y1="50" x2="505" y2="50" stroke="#fff" stroke-width="3"/>`;for(let i=0;i<=n;i++){const k=q.lo*q.den+i,x=30+i*u,b=k%q.den==0;h+=`<line x1="${x}" y1="${b?36:42}" x2="${x}" y2="${b?64:58}" stroke="#fff" stroke-width="2"/>${b?`<text x="${x}" y="90" fill="#fff" font-size="16" text-anchor="middle">${k/q.den}</text>`:''}<circle id="c${k}" cx="${x}" cy="50" r="${Math.max(6,Math.min(14,u/2.2))}" fill="transparent" onclick="pk(${k})" style="cursor:pointer"/>`}return h+`</svg><button class=btn onclick="cn()">Xác nhận</button>`}};
+const ck=i=>res(i===G.cur.a,i);
+function cf(){const v=$('fi').value;if(!v.trim())return;res(G.cur.a.some(a=>Math.abs(val(a)-val(v))<1e-9||a.trim()==v.trim()))}
+const COL=['#ffd166','#06d6a0','#4cc9f0','#f78fb3'];
+function pnt(){const m=G.m,q=G.cur;q.L.forEach((_,i)=>{$('l'+i).style.background=m.l==i?'rgba(255,255,255,.45)':'';$('l'+i).style.borderColor=''});q.R.forEach((_,j)=>{$('r'+j).style.background=''});Object.keys(m.p).forEach((i,k)=>{$('l'+i).style.background=$('r'+m.p[i]).style.background=COL[k%4]+'88'})}
+function ml(i){if(G.done||G.m.p[i]!==undefined)return;G.m.l=i;pnt()}
+function mr(j){const m=G.m,q=G.cur;if(G.done||m.l===null||Object.values(m.p).includes(j))return;m.p[m.l]=j;m.l=null;pnt();if(Object.keys(m.p).length==q.L.length)res(q.a.every((a,i)=>m.p[i]===a))}
+function po(i){if(G.done||G.o.includes(i))return;G.o.push(i);$('p'+i).disabled=true;$('ol').textContent=G.o.map(j=>G.cur.o[j]).join(' → ');if(G.o.length==G.cur.o.length)res(G.o.every((v,k)=>v==k))}
+function ur(){if(G.done)return;G.o=[];G.cur.o.forEach((_,i)=>$('p'+i).disabled=false);$('ol').innerHTML='&nbsp;'}
+function pt(i,v){if(G.done)return;G.t[i]=v;$('t'+i+v).classList.add('sel');$('t'+i+(1-v)).classList.remove('sel')}
+function ct(){const q=G.cur;if(q.s.some((_,i)=>G.t[i]===undefined))return alert('Em chọn Đúng/Sai cho cả '+q.s.length+' ý nhé!');res(q.a.every((a,i)=>G.t[i]==(a?1:0)))}
+function pk(k){if(G.done)return;if(G.sel!==null)$('c'+G.sel).setAttribute('fill','transparent');G.sel=k;$('c'+k).setAttribute('fill','#ffd86b')}
+function cn(){if(G.sel===null)return alert('Em hãy chạm vào một vạch trên trục số!');res(G.sel===G.cur.a)}
+const ansTxt=q=>q.t=='mc'?`Đáp án: <b>${q.o[q.a]}</b>`:q.t=='fill'?`Đáp án: <b>${q.a[0]}</b>`:q.t=='order'?`Đúng thứ tự: <b>${q.o.join(' → ')}</b>`:q.t=='match'?q.L.map((l,i)=>l+' ↔ '+q.R[q.a[i]]).join(' • '):q.t=='nl'?`Đáp án: vạch <b>${q.a}/${q.den}</b>`:q.s.map((_,i)=>`(${i+1}) ${q.a[i]?'Đúng':'Sai'}`).join(' | ');
+function res(ok,p){if(G.done)return;G.done=1;G.paused=1;const q=G.cur;let note='';
+if(G.rev){if(ok){S.hearts=2;G.rev=null;sfx.ok()}else sfx.no()}
+else{const g=q.g||TAG[G.r-1];G.tg[g]=G.tg[g]||[0,0];G.tg[g][0]++;
+if(ok){G.ok++;sfx.ok();if(G.v)S.vault=S.vault.filter(x=>x.q!=q.q);else{S.xp+=10*XPL[G.l];S.gold+=5;if(G.s==4)G.boss--}}
+else{sfx.no();G.w.push(q);G.tg[g][1]++;if(!G.v){if(!S.vault.some(x=>x.q==q.q))S.vault.push(q);if(G.s==4)G.q.push(q);if(G.sd){G.sd=0;note='🛡️ Khiên rèn đã đỡ đòn!'}else if(G.s==3)G.time-=3;else{S.hearts--;if(S.hearts<=0)G.rev=q}}}}
+save();$('hd').innerHTML=hudIn();if(q.t=='mc'){$('o'+q.a).classList.add('cor');if(!ok)$('o'+p).classList.add('bad')}
+$('fb').innerHTML=`<div class="fb ${ok?'ok':'no'}"><b>${ok?'🎉 Chính xác!':'💥 Chưa đúng!'}</b> ${note}<br>${ansTxt(q)}<br>${q.e||''}<button class=btn onclick="nx()">Tiếp ▶</button></div>`}
+function nx(){if(G.rev)return ask();G.i++;(G.v?G.i>=G.q.length:G.s==4?G.boss<=0:G.s==3?G.i>=G.n||G.time<=0:G.i>=G.q.length)?end():ask()}
+function end(){if(G.ended)return;G.ended=1;clearInterval(G.tm);const{r,s,l}=G;const pass=G.v||(s==3?G.ok>=Math.ceil(G.n/2):s==4?G.boss<=0:1),tot=s==4?G.ok+G.w.length:G.n,acc=G.ok/(tot||1),st=pass?(acc>=1?3:acc>=.75?2:1):0,sec=Math.round((Date.now()-G.t0)/1000);
+if(!G.v){const k=r+'-'+s,old=S.prog[k]||0;if(pass){S.xp+=Math.max(0,st-old)*20;S.prog[k]=Math.max(old,st);S.hearts=Math.min(S.max,S.hearts+1)}save();snd({r,s,l,ok:G.ok,n:tot,st,sec,pass,tg:G.tg})}
+pass?(st==3?sfx.win():sfx.star()):sfx.no();if(st>=2)boom();
+const last=!G.v&&r==5&&s==4&&pass;
+R(hud()+`<div class="card c"><div class=big>${G.v?'📚':pass?'🏆':'💪'}</div><h2>${G.v?'Xong Kho Ôn Tập!':pass?'Vượt chặng thành công!':'Chưa đạt – cố lên Hiệp sĩ!'}</h2><div class=big style="font-size:40px">${'⭐'.repeat(st)}${'☆'.repeat(3-st)}</div><p class=tx>Đúng ${G.ok}/${tot} câu • ${sec} giây</p>${G.w.length?`<h3>Các câu cần chú ý (đã vào Kho Ôn Tập)</h3>`+G.w.map(q=>`<div class=wr><b>${q.q}</b><br>${ansTxt(q)}<br>${q.e||''}</div>`).join(''):'<p class=sm>Không sai câu nào – tuyệt vời! 🎉</p>'}${last?`<button class=btn onclick="fin()">🏆 Nhận phần thưởng</button>`:pass&&!G.v?`<button class=btn onclick="${s<4?`lv(${r},${s+1})`:`lv(${r+1},1)`}">Chặng tiếp theo ▶</button><button class="btn ghost" onclick="lv(${r},${s})">Chơi lại ở mức khác</button>`:!G.v?`<button class=btn onclick="lv(${r},${s})">Thử lại</button>`:''}<button class="btn ghost" onclick="map()">🗺️ Về bản đồ</button></div>`)}
+function snd(d){if(!API)return;const b=Object.assign({name:S.name,cls:S.cls,role:S.role,xp:S.xp,hearts:S.hearts,stars:stars()},d);fetch(API,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(b)}).catch(()=>{})}
+function fin(){const t=stars(),b=t>=50?'Đại Hiệp sĩ Hữu Tỉ 👑':t>=30?'Hiệp sĩ Tinh anh 🥇':'Hiệp sĩ Tập sự 🥉';sfx.win();boom();
+R(`<div class="card c"><div class=big>🦉</div><p class=tx>“Chúc mừng Hiệp sĩ ${S.name} – ${S.cls}! Phong ấn của Quỷ Sai Dấu và Phù thủy Mẫu Số đã hoàn toàn bị phá vỡ. Vương quốc Hữu Tỉ đã tìm lại được sự cân bằng trên trục số nhờ trí tuệ và lòng kiên trì của em!”</p><h2>${b}</h2><p class=tx>✨ ${S.xp} XP • ⭐ ${t}/60 sao • ❤️ ${S.hearts} Tim</p><button class=btn id=sb onclick="snd({r:0,s:0,l:'d',ok:0,n:0,st:0,sec:0,pass:1,tg:{}});this.textContent='✅ Đã gửi cho Thầy/Cô';this.disabled=true">📨 Gửi kết quả cho Thầy/Cô</button><button class="btn ghost" onclick="vp()">📚 Luyện tập Kho Ôn Tập (${S.vault.length})</button><button class="btn ghost" onclick="map()">🗺️ Về bản đồ</button></div>`)}
+intro();
+</script></body></html>

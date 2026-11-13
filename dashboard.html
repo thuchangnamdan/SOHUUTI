@@ -1,0 +1,48 @@
+﻿<!DOCTYPE html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Kết quả tự gửi về trang giáo viên</title>
+<style>
+:root{--t:#0f5c55;--r:#c8473f;--bg:#f4f7f6;--ln:#dfe7e4;--tx:#1c2b28;--card:#fff;--soft:#e3f1ee}
+@media(prefers-color-scheme:dark){:root{--bg:#10201e;--ln:#2b4541;--tx:#e6f0ee;--card:#162a27;--soft:#1d3a36;--t:#5fc4b8;--r:#ef7b72}}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,'Segoe UI',sans-serif}
+main{max-width:920px;margin:auto;padding:20px}
+h1,h2{font-family:Georgia,'Times New Roman',serif;color:var(--t)}h1{font-size:28px;margin:0 0 4px}h2{font-size:21px;margin:26px 0 8px}
+.top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+select,button{font:inherit;padding:7px 12px;border-radius:10px;border:1px solid var(--ln);background:var(--card);color:var(--tx)}
+.g{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.s{background:var(--soft);border-top:4px solid var(--t);border-radius:14px;padding:16px 18px;font-size:13px}
+.s b{display:block;font:700 36px Georgia,serif;color:var(--t)}.s b small{font-size:18px;font-weight:400}
+.c{background:var(--card);border:1px solid var(--ln);border-radius:14px;padding:14px 16px}
+.pb{height:9px;background:var(--ln);border-radius:9px;margin-top:6px}.pb i{display:block;height:100%;border-radius:9px}
+table{width:100%;border-collapse:collapse;font-size:14px}th{text-align:left;font-size:12px;letter-spacing:.04em;color:var(--t);background:var(--soft);padding:9px 12px}td{padding:9px 12px;border-top:1px solid var(--ln)}
+.chip{display:inline-block;background:#fdebc8;color:#5a3d00;border-radius:8px;padding:2px 9px;margin:2px;font-size:13px}
+.br{display:flex;align-items:center;gap:8px;font-size:13px;margin:3px 0}.br i{display:block;height:15px;border-radius:3px;min-width:2px}
+.lb{display:flex;gap:14px;font-size:13px;justify-content:flex-end}.lb i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px}
+.sm{font-size:13px;opacity:.75}
+</style></head><body><main>
+<div class="top"><div><h1>Kết quả tự gửi về trang giáo viên</h1><div class="sm" id="up">Đang tải dữ liệu…</div></div>
+<div><select id="lop" onchange="draw()"><option value="">Tất cả các lớp</option></select> <button onclick="load()">Tải lại</button></div></div>
+<div id="root"></div></main>
+<script>
+const API="https://script.google.com/macros/s/AKfycbzNG_mk2AgcAYPIX3S3J71vR5Vb5n3Spg0x2sfxBoWKdLM3QTJyuO7igiwD6YRZtIliMA/exec"; // ← DÁN LINK APPS SCRIPT (Web app) VÀO ĐÂY
+const SISO={'7C':42,'7B':38, '7B':42,'7E':38}; // ← Sĩ số từng lớp: sửa cho đúng lớp của thầy/cô
+const COL=['#0f5c55','#c8473f','#d99a1c','#3b6fb6'],$=id=>document.getElementById(id),fm=n=>(+n).toLocaleString('vi-VN');
+let D=[];
+async function load(){if(!API){$('up').textContent='Chưa dán link Apps Script vào biến API ở đầu file dashboard.html';return}
+try{D=await(await fetch(API)).json();$('up').textContent='Cập nhật lúc '+new Date().toLocaleTimeString('vi-VN')+' • '+D.length+' lượt gửi'}catch(e){$('up').textContent='Không tải được dữ liệu – kiểm tra link Apps Script (quyền truy cập: Bất kỳ ai).'}draw()}
+function draw(){
+const P={};D.forEach(x=>{const k=x.cls+'|'+x.name,p=P[k]=P[k]||{name:x.name,cls:x.cls,n:0,st:{},xp:0,fin:0,tg:{}};p.n+=+x.n||0;p.xp=Math.max(p.xp,+x.xp||0);if(x.r&&x.s){const q=x.r+'-'+x.s;p.st[q]=Math.max(p.st[q]||0,+x.st||0)}if(x.r==5&&x.s==4&&+x.pass)p.fin=1;for(const g in x.tg){const a=p.tg[g]=p.tg[g]||[0,0];a[0]+=x.tg[g][0];a[1]+=x.tg[g][1]}});
+const PL=Object.values(P),cls=[...new Set([...PL.map(p=>p.cls),...Object.keys(SISO)])].sort(),sel=$('lop');
+if(sel.options.length==1)cls.forEach(c=>sel.add(new Option('Lớp '+c,c)));
+const f=sel.value,pf=PL.filter(p=>!f||p.cls==f),tot=f?(SISO[f]||pf.length):cls.reduce((a,c)=>a+(SISO[c]||PL.filter(p=>p.cls==c).length),0)||pf.length;
+let h=`<div class="g" style="margin-top:16px"><div class="s"><b>${pf.length}<small>/${tot} em</small></b>đã chơi ở nhà (${Math.round(100*pf.length/(tot||1))}% ${f?'lớp '+f:'các lớp'})</div><div class="s"><b>${fm(pf.reduce((a,p)=>a+p.n,0))}</b>câu hỏi các em đã tự làm</div><div class="s"><b>${pf.filter(p=>p.fin).length}<small> em</small></b>đã đi hết cả 5/5 vùng đất</div></div><div class="g" style="margin-top:12px">`;
+cls.forEach((c,i)=>{const pc=PL.filter(p=>p.cls==c),sz=SISO[c]||pc.length,pct=Math.round(100*pc.length/(sz||1));h+=`<div class="c"><b style="font:700 22px Georgia,serif">${c}</b> <span style="margin-left:8px"><b>${pc.length}/${sz} em</b> đã chơi • <b>${fm(pc.reduce((a,p)=>a+p.n,0))}</b> câu</span><div class="sm">sĩ số ${sz}</div><div class="pb"><i style="width:${Math.min(100,pct)}%;background:${COL[i%4]}"></i></div></div>`});
+h+=`</div><h2>Tỉ lệ làm sai theo dạng bài</h2><div class="c"><div class="lb">${cls.map((c,i)=>`<span><i style="background:${COL[i%4]}"></i>${c}</span>`).join('')}</div>`;
+const tags=[...new Set(PL.flatMap(p=>Object.keys(p.tg)))],rate=(c,g)=>{let a=0,w=0;PL.filter(p=>p.cls==c).forEach(p=>{if(p.tg[g]){a+=p.tg[g][0];w+=p.tg[g][1]}});return a?Math.round(100*w/a):null};
+tags.sort((a,b)=>Math.max(...cls.map(c=>rate(c,b)||0))-Math.max(...cls.map(c=>rate(c,a)||0))).forEach(g=>{h+=`<div style="display:flex;gap:12px;margin:12px 0;align-items:center"><div style="width:150px;text-align:right;font-weight:600;font-size:14px">${g}</div><div style="flex:1">${cls.map((c,i)=>{const r=rate(c,g);return r===null?'':`<div class="br"><i style="width:${r*.8}%;background:${COL[i%4]}"></i><b>${r}%</b></div>`}).join('')}</div></div>`});
+if(!tags.length)h+='<p class="sm">Chưa có dữ liệu.</p>';
+h+=`</div><h2>Dạng bài cần hỗ trợ ${f?'– lớp '+f:''}</h2><div class="c" style="padding:0;overflow:hidden"><table><tr><th>DẠNG BÀI</th><th>CẦN HỖ TRỢ (sai từ 40% trở lên)</th></tr>`;
+tags.forEach(g=>{const w=pf.filter(p=>p.tg[g]&&p.tg[g][0]>=2&&p.tg[g][1]/p.tg[g][0]>=.4);if(w.length)h+=`<tr><td>${g}</td><td>${w.map(p=>`<span class="chip">${p.name}${f?'':' ('+p.cls+')'}</span>`).join('')}</td></tr>`});
+h+=`</table></div><h2>Bảng xếp hạng</h2><div class="c" style="padding:0;overflow:hidden"><table><tr><th>HẠNG</th><th>HIỆP SĨ</th><th>LỚP</th><th>SAO</th><th>XP</th></tr>`;
+pf.map(p=>({...p,s:Object.values(p.st).reduce((a,b)=>a+b,0)})).sort((a,b)=>b.s-a.s||b.xp-a.xp).slice(0,10).forEach((p,i)=>{h+=`<tr><td>${i+1}</td><td>${p.name}${p.fin?' 🏆':''}</td><td>${p.cls}</td><td>${p.s}</td><td>${fm(p.xp)}</td></tr>`});
+$('root').innerHTML=h+'</table></div>'}
+load();setInterval(load,60000);
+</script></body></html>
